@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"runtime/debug"
 
-	"github.com/lfittl/pg_query_go/parser"
+	"github.com/Ready-Stock/pg_query_go/parser"
 )
 
 // ParseToJSON - Parses the given SQL statement into an AST (JSON format)
@@ -13,7 +13,7 @@ func ParseToJSON(input string) (result string, err error) {
 }
 
 // Parse the given SQL statement into an AST (native Go structs)
-func Parse(input string) (tree ParsetreeList, err error) {
+func Parse(input string) (tree *ParsetreeList, err error) {
 	jsonTree, err := ParseToJSON(input)
 	if err != nil {
 		return
@@ -30,6 +30,7 @@ func Parse(input string) (tree ParsetreeList, err error) {
 	}()
 
 	err = json.Unmarshal([]byte(jsonTree), &tree)
+	tree.Query = input
 	return
 }
 

@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/kr/pretty"
-	"github.com/lfittl/pg_query_go"
-	nodes "github.com/lfittl/pg_query_go/nodes"
-	util "github.com/lfittl/pg_query_go/util"
+	"github.com/Ready-Stock/pg_query_go"
+	nodes "github.com/Ready-Stock/pg_query_go/nodes"
+	util "github.com/Ready-Stock/pg_query_go/util"
 )
 
 var parseTests = []struct {
@@ -673,6 +673,7 @@ var parseTests = []struct {
 
 func TestParse(t *testing.T) {
 	for _, test := range parseTests {
+		fmt.Println(test.input)
 		actualJSON, err := pg_query.ParseToJSON(test.input)
 		if err != nil {
 			t.Errorf("Parse(%s)\nerror %s\n\n", test.input, err)
@@ -762,7 +763,7 @@ var parsePlPgSQLTests = []struct {
 func TestParsePlPgSQL(t *testing.T) {
 	for _, test := range parsePlPgSQLTests {
 		actualJSON, err := pg_query.ParsePlPgSqlToJSON(test.input)
-
+		fmt.Println(test.input)
 		if err != nil {
 			t.Errorf("ParsePlPgSqlToJSON(%s)\nerror %s\n\n", test.input, err)
 		} else if actualJSON != test.expectedJSON {

@@ -3,7 +3,7 @@ package pg_query_test
 import (
 	"testing"
 
-	"github.com/lfittl/pg_query_go"
+	"github.com/Ready-Stock/pg_query_go"
 )
 
 // Prevent compiler optimizations by assigning all results to global variables

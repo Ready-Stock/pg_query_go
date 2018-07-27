@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	nodes "github.com/lfittl/pg_query_go/nodes"
+	nodes "github.com/Ready-Stock/pg_query_go/nodes"
 )
 
 type ParsetreeList struct {
 	Statements []nodes.Node
+	Query string
 }
 
 func (input ParsetreeList) MarshalJSON() ([]byte, error) {
