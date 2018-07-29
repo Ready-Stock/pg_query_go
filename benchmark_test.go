@@ -9,7 +9,7 @@ import (
 // Prevent compiler optimizations by assigning all results to global variables
 var err error
 var resultStr string
-var resultTree pg_query.ParsetreeList
+var resultTree *pg_query.ParsetreeList
 
 func benchmarkParse(input string, b *testing.B) {
 	for i := 0; i < b.N; i++ {
@@ -27,7 +27,7 @@ func benchmarkParse(input string, b *testing.B) {
 
 func benchmarkParseParallel(input string, b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
-		var tree pg_query.ParsetreeList
+		var tree *pg_query.ParsetreeList
 
 		for pb.Next() {
 			tree, err = pg_query.Parse(input)
