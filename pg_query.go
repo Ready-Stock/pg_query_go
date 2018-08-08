@@ -7,6 +7,8 @@ import (
 	"github.com/Ready-Stock/pg_query_go/parser"
 	pq "github.com/Ready-Stock/pg_query_go/nodes"
 	"strings"
+	"reflect"
+	"github.com/kataras/go-errors"
 )
 
 // ParseToJSON - Parses the given SQL statement into an AST (JSON format)
@@ -45,7 +47,7 @@ const (
 	Update contextType = "Update"
 )
 
-func Deparse(n *pq.Node) (*string, error) {
+func Deparse(n pq.Node) (*string, error) {
 	return deparse_item(n, nil)
 }
 
@@ -62,8 +64,11 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_insert_into(node)
 	case pq.SelectStmt:
 		return deparse_select(node)
+	case pq.RawStmt:
+		return Deparse(node.Stmt)
 	default:
-		return nil, nil
+		t := reflect.TypeOf(node).String()
+		return nil, errors.New("cannot handle node type (%s)").Format(t)
 	}
 }
 
