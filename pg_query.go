@@ -80,7 +80,8 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_restarget(node, ctx)
 	case pq.SelectStmt:
 		return deparse_select(node)
-
+	case pq.SQLValueFunction:
+		return deparse_sqlvaluefunction(node)
 	case pq.String:
 		switch *ctx {
 		case A_CONST:
@@ -308,6 +309,15 @@ func deparse_select(node pq.SelectStmt) (*string, error) {
 
 	result := strings.Join(out, " ")
 	return &result, nil
+}
+
+func deparse_sqlvaluefunction(node pq.SQLValueFunction) (*string, error) {
+	switch node.Op {
+	case pq.SVFOP_CURRENT_TIMESTAMP:
+		result := "CURRENT_TIMESTAMP"
+		return &result, nil
+	}
+	return nil, nil
 }
 
 func deparse_restarget(node pq.ResTarget, ctx *contextType) (*string, error) {
