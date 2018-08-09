@@ -184,7 +184,7 @@ func deparse_aexpr_in(node pq.A_Expr) (*string, error) {
 		if str, err := deparse_item(node.Lexpr, nil); err != nil {
 			return nil, err
 		} else {
-			result := fmt.Sprintf("%s %s (%s)", str, operator, strings.Join(out, ", "))
+			result := fmt.Sprintf("%s %s (%s)", *str, operator, strings.Join(out, ", "))
 			return &result, nil
 		}
 	}
@@ -196,7 +196,7 @@ func deparse_alias(node pq.Alias) (*string, error) {
 			return nil, err
 		} else {
 			cols := strings.Join(colnames, ", ")
-			result := fmt.Sprintf(`%s (%s)`, node.Aliasname, cols)
+			result := fmt.Sprintf(`%s (%s)`, *node.Aliasname, cols)
 			return &result, nil
 		}
 	} else {
