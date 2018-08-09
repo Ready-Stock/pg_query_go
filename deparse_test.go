@@ -62,3 +62,31 @@ func Test_DeparseInsert1(t *testing.T) {
 	}
 }
 
+func Test_DeparseBigSelect(t *testing.T) {
+	input := `
+		select t.oid,
+			case when nsp.nspname in ('pg_catalog', 'public') then t.typname
+				else nsp.nspname||'.'||t.typname
+			end
+		from pg_type t
+		left join pg_type base_type on t.typelem=base_type.oid
+		left join pg_namespace nsp on t.typnamespace=nsp.oid
+		where (
+			  t.typtype in('b', 'p', 'r', 'e')
+			  and (base_type.oid is null or base_type.typtype in('b', 'p', 'r'))
+			);
+		`
+	fmt.Printf("INPUT: %s\n", input)
+	tree, _ := Parse(input)
+	json, _ := tree.MarshalJSON()
+	fmt.Println(string(json))
+	if sql, err := Deparse(tree.Statements[0]); err != nil {
+		t.Error(err)
+		t.Fail()
+	} else {
+		fmt.Printf("OUTPUT: %s\n", *sql)
+	}
+}
+
+
+

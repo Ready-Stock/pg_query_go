@@ -43,18 +43,26 @@ func Parse(input string) (tree *ParsetreeList, err error) {
 type contextType string
 
 const (
-	True    contextType = "True"
-	False   contextType = "False"
-	Select  contextType = "Select"
-	Update  contextType = "Update"
-	A_CONST contextType = "A_CONST"
+	True      contextType = "True"
+	False     contextType = "False"
+	Select    contextType = "Select"
+	Update    contextType = "Update"
+	A_CONST   contextType = "A_CONST"
 	FUNC_CALL contextType = "FUNC_CALL"
 	TYPE_NAME contextType = "TYPE_NAME"
-
+	Operator  contextType = "Operator"
 )
 
 var (
-	Star string = "*"
+	Star       = "*"
+	_True      = True
+	_False     = False
+	_Select    = Select
+	_Update    = Update
+	_A_CONST   = A_CONST
+	_FUNC_CALL = FUNC_CALL
+	_TYPE_NAME = TYPE_NAME
+	_Operator  = Operator
 )
 
 func Deparse(node pq.Node) (*string, error) {
@@ -67,6 +75,8 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		switch node.Kind {
 		case pq.AEXPR_OP:
 			return deparse_aexpr(node, ctx)
+		case pq.AEXPR_IN:
+			return deparse_aexpr_in(node)
 		default:
 			return nil, nil
 		}
@@ -76,6 +86,10 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_a_const(node)
 	case pq.A_Star:
 		return deparse_a_star(node)
+	case pq.CaseExpr:
+		return deparse_case(node)
+	case pq.CaseWhen:
+		return deparse_when(node)
 	case pq.ColumnRef:
 		return deparse_columnref(node)
 	case pq.InsertStmt:
@@ -134,6 +148,48 @@ func deparse_aexpr(node pq.A_Expr, ctx *contextType) (*string, error) {
 	return nil, nil
 }
 
+func deparse_aexpr_in(node pq.A_Expr) (*string, error) {
+	out := make([]string, 0)
+
+	if node.Rexpr == nil {
+		return nil, errors.New("rexpr of IN expression cannot be null")
+	}
+
+
+	// TODO (@elliotcourant) convert to handle list
+	if str, err := deparse_item(node.Rexpr, nil); err != nil {
+		return nil, err
+	} else {
+		out = append(out, *str)
+	}
+
+	if node.Name.Items == nil || len(node.Name.Items) == 0 {
+		return nil, errors.New("names of IN expression cannot be empty")
+	}
+
+	if strs, err := deparse_item_list(node.Name.Items, &_Operator); err != nil {
+		return nil, err
+	} else {
+		operator := ""
+		if reflect.DeepEqual(strs, []string{"="}) {
+			operator = "IN"
+		} else {
+			operator = "NOT IN"
+		}
+
+		if node.Lexpr == nil {
+			return nil, errors.New("lexpr of IN expression cannot be null")
+		}
+
+		if str, err := deparse_item(node.Lexpr, nil); err != nil {
+			return nil, err
+		} else {
+			result := fmt.Sprintf("%s %s (%s)", str, operator, strings.Join(out, ", "))
+			return &result, nil
+		}
+	}
+}
+
 func deparse_alias(node pq.Alias) (*string, error) {
 	if node.Colnames.Items != nil && len(node.Colnames.Items) > 0 {
 		if colnames, err := deparse_item_list(node.Colnames.Items, nil); err != nil {
@@ -149,12 +205,46 @@ func deparse_alias(node pq.Alias) (*string, error) {
 }
 
 func deparse_a_const(node pq.A_Const) (*string, error) {
-	ctx := A_CONST
-	return deparse_item(node.Val, &ctx)
+	return deparse_item(node.Val, &_A_CONST)
 }
 
 func deparse_a_star(node pq.A_Star) (*string, error) {
 	return &Star, nil
+}
+
+func deparse_case(node pq.CaseExpr) (*string, error) {
+	out := []string{"CASE"}
+
+	if node.Arg != nil {
+		if str, err := deparse_item(node.Arg, nil); err != nil {
+			return nil, err
+		} else {
+			out = append(out, *str)
+		}
+	}
+
+	if node.Args.Items == nil || len(node.Args.Items) == 0 {
+		return nil, errors.New("case expression cannot have no arguments")
+	}
+
+	if args, err := deparse_item_list(node.Args.Items, nil); err != nil {
+		return nil, err
+	} else {
+		out = append(out, args...)
+	}
+
+	if node.Defresult != nil {
+		out = append(out, "ELSE")
+		if str, err := deparse_item(node.Defresult, nil); err != nil {
+			return nil, err
+		} else {
+			out = append(out, *str)
+		}
+	}
+
+	out = append(out, "END")
+	result := strings.Join(out, " ")
+	return &result, nil
 }
 
 func deparse_columnref(node pq.ColumnRef) (*string, error) {
@@ -243,9 +333,8 @@ func deparse_insert_into(node pq.InsertStmt) (*string, error) {
 	if node.ReturningList.Items != nil && len(node.ReturningList.Items) > 0 {
 		out = append(out, "RETURNING")
 		fields := make([]string, len(node.ReturningList.Items))
-		ctx := Select
 		for i, field := range node.ReturningList.Items {
-			if str, err := deparse_item(field, &ctx); err != nil {
+			if str, err := deparse_item(field, &_Select); err != nil {
 				return nil, err
 			} else {
 				fields[i] = *str
@@ -297,9 +386,8 @@ func deparse_select(node pq.SelectStmt) (*string, error) {
 			out = append(out, "DISTINCT")
 		}
 		fields := make([]string, len(node.TargetList.Items))
-		ctx := Select
 		for i, field := range node.TargetList.Items {
-			if str, err := deparse_item(field, &ctx); err != nil {
+			if str, err := deparse_item(field, &_Select); err != nil {
 				return nil, err
 			} else {
 				fields[i] = *str
@@ -311,9 +399,8 @@ func deparse_select(node pq.SelectStmt) (*string, error) {
 	if node.FromClause.Items != nil && len(node.FromClause.Items) > 0 {
 		out = append(out, "FROM")
 		froms := make([]string, len(node.FromClause.Items))
-		ctx := Select
 		for i, from := range node.FromClause.Items {
-			if str, err := deparse_item(from, &ctx); err != nil {
+			if str, err := deparse_item(from, &_Select); err != nil {
 				return nil, err
 			} else {
 				froms[i] = *str
@@ -438,11 +525,32 @@ func deparse_item_list(nodes []pq.Node, ctx *contextType) ([]string, error) {
 	for i, node := range nodes {
 		if str, err := deparse_item(node, ctx); err != nil {
 			return nil, err
- 		} else {
- 			out[i] = *str
+		} else {
+			out[i] = *str
 		}
 	}
 	return out, nil
+}
+
+func deparse_when(node pq.CaseWhen) (*string, error) {
+	out := []string{"WHEN"}
+
+	if str, err := deparse_item(node.Expr, nil); err != nil {
+		return nil, err
+	} else {
+		out = append(out, *str)
+	}
+
+	out = append(out, "THEN")
+
+	if str, err := deparse_item(node.Result, nil); err != nil {
+		return nil, err
+	} else {
+		out = append(out, *str)
+	}
+
+	result := strings.Join(out, " ")
+	return &result, nil
 }
 
 // ParsePlPgSqlToJSON - Parses the given PL/pgSQL function statement into an AST (JSON format)
