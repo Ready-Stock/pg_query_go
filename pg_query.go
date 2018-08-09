@@ -57,8 +57,8 @@ var (
 	Star string = "*"
 )
 
-func Deparse(n pq.Node) (*string, error) {
-	return deparse_item(n, nil)
+func Deparse(node pq.Node) (*string, error) {
+	return deparse_item(node, nil)
 }
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
@@ -74,12 +74,21 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_alias(node)
 	case pq.A_Const:
 		return deparse_a_const(node)
+	case pq.A_Star:
+		return deparse_a_star(node)
+	case pq.ColumnRef:
+		return deparse_columnref(node)
 	case pq.InsertStmt:
 		return deparse_insert_into(node)
 	case pq.RangeVar:
 		return deparse_rangevar(node)
 	case pq.RawStmt:
-		return Deparse(node.Stmt)
+		if result, err := Deparse(node.Stmt); err != nil {
+			return nil, err
+		} else {
+			result := fmt.Sprintf("%s;", *result)
+			return &result, nil
+		}
 	case pq.ResTarget:
 		return deparse_restarget(node, ctx)
 	case pq.SelectStmt:
@@ -148,6 +157,27 @@ func deparse_a_star(node pq.A_Star) (*string, error) {
 	return &Star, nil
 }
 
+func deparse_columnref(node pq.ColumnRef) (*string, error) {
+	if node.Fields.Items == nil || len(node.Fields.Items) == 0 {
+		return nil, errors.New("columnref cannot have no fields")
+	}
+	out := make([]string, len(node.Fields.Items))
+	for i, field := range node.Fields.Items {
+		switch f := field.(type) {
+		case pq.String:
+			out[i] = fmt.Sprintf(`"%s"`, f.Str)
+		default:
+			if str, err := deparse_item(field, nil); err != nil {
+				return nil, err
+			} else {
+				out[i] = *str
+			}
+		}
+	}
+	result := strings.Join(out, ".")
+	return &result, nil
+}
+
 func deparse_rangevar(node pq.RangeVar) (*string, error) {
 	out := make([]string, 0)
 	if !node.Inh {
@@ -193,12 +223,12 @@ func deparse_insert_into(node pq.InsertStmt) (*string, error) {
 	}
 
 	if node.Cols.Items != nil {
-		cols := make([]string, 0)
-		for _, col := range node.Cols.Items {
+		cols := make([]string, len(node.Cols.Items))
+		for i, col := range node.Cols.Items {
 			if str, err := deparse_item(col, nil); err != nil {
 				return nil, err
 			} else {
-				cols = append(cols, *str)
+				cols[i] = *str
 			}
 		}
 		out = append(out, fmt.Sprintf("(%s)", strings.Join(cols, ",")))
@@ -209,6 +239,21 @@ func deparse_insert_into(node pq.InsertStmt) (*string, error) {
 	} else {
 		out = append(out, *str)
 	}
+
+	if node.ReturningList.Items != nil && len(node.ReturningList.Items) > 0 {
+		out = append(out, "RETURNING")
+		fields := make([]string, len(node.ReturningList.Items))
+		ctx := Select
+		for i, field := range node.ReturningList.Items {
+			if str, err := deparse_item(field, &ctx); err != nil {
+				return nil, err
+			} else {
+				fields[i] = *str
+			}
+		}
+		out = append(out, strings.Join(fields, ", "))
+	}
+
 	result := strings.Join(out, " ")
 	return &result, nil
 }

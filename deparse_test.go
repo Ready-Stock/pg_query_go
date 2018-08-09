@@ -49,7 +49,7 @@ func Test_DeparseCurrentTimestamp(t *testing.T) {
 
 
 func Test_DeparseInsert1(t *testing.T) {
-	input := "insert into public.users (email, password) values ('email@google.com', 'strongpassword') returning *;"
+	input := "insert into public.users (email, password) values ('email@google.com', 'strongpassword') returning *"
 	fmt.Printf("INPUT: %s\n", input)
 	tree, _ := Parse(input)
 	json, _ := tree.MarshalJSON()
@@ -61,3 +61,4 @@ func Test_DeparseInsert1(t *testing.T) {
 		fmt.Printf("OUTPUT: %s\n", *sql)
 	}
 }
+
