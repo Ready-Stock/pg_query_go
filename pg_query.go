@@ -70,10 +70,14 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		default:
 			return nil, nil
 		}
+	case pq.Alias:
+		return deparse_alias(node)
 	case pq.A_Const:
 		return deparse_a_const(node)
 	case pq.InsertStmt:
 		return deparse_insert_into(node)
+	case pq.RangeVar:
+		return deparse_rangevar(node)
 	case pq.RawStmt:
 		return Deparse(node.Stmt)
 	case pq.ResTarget:
@@ -85,20 +89,19 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	case pq.String:
 		switch *ctx {
 		case A_CONST:
-			result := fmt.Sprint("'%s'", strings.Replace(node.Str, "'", "''", -1))
+			result := fmt.Sprintf("'%s'", strings.Replace(node.Str, "'", "''", -1))
 			return &result, nil
 		case FUNC_CALL, TYPE_NAME:
 			return &node.Str, nil
 		default:
-			result := fmt.Sprint(`"%s"`, strings.Replace(node.Str, `"`, `""`, -1))
+			result := fmt.Sprintf(`"%s"`, strings.Replace(node.Str, `"`, `""`, -1))
 			return &result, nil
 		}
 	case pq.Integer:
 		result := strconv.FormatInt(node.Ival, 10)
 		return &result, nil
 	default:
-		t := reflect.TypeOf(node).String()
-		return nil, errors.New("cannot handle node type (%s)").Format(t)
+		return nil, errors.New("cannot handle node type (%s)").Format(reflect.TypeOf(node).String())
 	}
 }
 
@@ -122,6 +125,20 @@ func deparse_aexpr(node pq.A_Expr, ctx *contextType) (*string, error) {
 	return nil, nil
 }
 
+func deparse_alias(node pq.Alias) (*string, error) {
+	if node.Colnames.Items != nil && len(node.Colnames.Items) > 0 {
+		if colnames, err := deparse_item_list(node.Colnames.Items, nil); err != nil {
+			return nil, err
+		} else {
+			cols := strings.Join(colnames, ", ")
+			result := fmt.Sprintf(`%s (%s)`, node.Aliasname, cols)
+			return &result, nil
+		}
+	} else {
+		return node.Aliasname, nil
+	}
+}
+
 func deparse_a_const(node pq.A_Const) (*string, error) {
 	ctx := A_CONST
 	return deparse_item(node.Val, &ctx)
@@ -129,6 +146,30 @@ func deparse_a_const(node pq.A_Const) (*string, error) {
 
 func deparse_a_star(node pq.A_Star) (*string, error) {
 	return &Star, nil
+}
+
+func deparse_rangevar(node pq.RangeVar) (*string, error) {
+	out := make([]string, 0)
+	if !node.Inh {
+		out = append(out, "ONLY")
+	}
+
+	if node.Schemaname != nil && len(*node.Schemaname) > 0 {
+		out = append(out, fmt.Sprintf(`"%s"."%s"`, *node.Schemaname, *node.Relname))
+	} else {
+		out = append(out, fmt.Sprintf(`"%s"`, *node.Relname))
+	}
+
+	if node.Alias != nil {
+		if str, err := deparse_item(node.Alias, nil); err != nil {
+			return nil, err
+		} else {
+			out = append(out, *str)
+		}
+	}
+
+	result := strings.Join(out, " ")
+	return &result, nil
 }
 
 func deparse_insert_into(node pq.InsertStmt) (*string, error) {
@@ -141,8 +182,11 @@ func deparse_insert_into(node pq.InsertStmt) (*string, error) {
 		}
 	}
 
+	if node.Relation == nil {
+		return nil, errors.New("relation in insert cannot be null!")
+	}
 	out = append(out, "INSERT INTO")
-	if str, err := deparse_item(node.Relation, nil); err != nil {
+	if str, err := deparse_item(*node.Relation, nil); err != nil {
 		return nil, err
 	} else {
 		out = append(out, *str)
@@ -157,7 +201,7 @@ func deparse_insert_into(node pq.InsertStmt) (*string, error) {
 				cols = append(cols, *str)
 			}
 		}
-		out = append(out, " ("+strings.Join(cols, ",")+") ")
+		out = append(out, fmt.Sprintf("(%s)", strings.Join(cols, ",")))
 	}
 
 	if str, err := deparse_item(node.SelectStmt, nil); err != nil {
@@ -321,7 +365,9 @@ func deparse_sqlvaluefunction(node pq.SQLValueFunction) (*string, error) {
 }
 
 func deparse_restarget(node pq.ResTarget, ctx *contextType) (*string, error) {
-	if *ctx == Select {
+	if ctx == nil {
+		return node.Name, nil
+	} else if *ctx == Select {
 		out := make([]string, 0)
 		if str, err := deparse_item(node.Val, nil); err != nil {
 			return nil, err
@@ -340,6 +386,18 @@ func deparse_restarget(node pq.ResTarget, ctx *contextType) (*string, error) {
 	} else {
 		return nil, nil
 	}
+}
+
+func deparse_item_list(nodes []pq.Node, ctx *contextType) ([]string, error) {
+	out := make([]string, len(nodes))
+	for i, node := range nodes {
+		if str, err := deparse_item(node, ctx); err != nil {
+			return nil, err
+ 		} else {
+ 			out[i] = *str
+		}
+	}
+	return out, nil
 }
 
 // ParsePlPgSqlToJSON - Parses the given PL/pgSQL function statement into an AST (JSON format)

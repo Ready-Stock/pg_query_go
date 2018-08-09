@@ -46,3 +46,18 @@ func Test_DeparseCurrentTimestamp(t *testing.T) {
 		fmt.Printf("OUTPUT: %s\n", *sql)
 	}
 }
+
+
+func Test_DeparseInsert1(t *testing.T) {
+	input := "insert into public.users (email, password) values ('email@google.com', 'strongpassword') returning *;"
+	fmt.Printf("INPUT: %s\n", input)
+	tree, _ := Parse(input)
+	json, _ := tree.MarshalJSON()
+	fmt.Println(string(json))
+	if sql, err := Deparse(tree.Statements[0]); err != nil {
+		t.Error(err)
+		t.Fail()
+	} else {
+		fmt.Printf("OUTPUT: %s\n", *sql)
+	}
+}
