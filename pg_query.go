@@ -9,6 +9,8 @@ import (
 	"strings"
 	"reflect"
 	"github.com/kataras/go-errors"
+	"fmt"
+	"strconv"
 )
 
 // ParseToJSON - Parses the given SQL statement into an AST (JSON format)
@@ -41,10 +43,18 @@ func Parse(input string) (tree *ParsetreeList, err error) {
 type contextType string
 
 const (
-	True   contextType = "True"
-	False  contextType = "False"
-	Select contextType = "Select"
-	Update contextType = "Update"
+	True    contextType = "True"
+	False   contextType = "False"
+	Select  contextType = "Select"
+	Update  contextType = "Update"
+	A_CONST contextType = "A_CONST"
+	FUNC_CALL contextType = "FUNC_CALL"
+	TYPE_NAME contextType = "TYPE_NAME"
+
+)
+
+var (
+	Star string = "*"
 )
 
 func Deparse(n pq.Node) (*string, error) {
@@ -60,12 +70,31 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		default:
 			return nil, nil
 		}
+	case pq.A_Const:
+		return deparse_a_const(node)
 	case pq.InsertStmt:
 		return deparse_insert_into(node)
-	case pq.SelectStmt:
-		return deparse_select(node)
 	case pq.RawStmt:
 		return Deparse(node.Stmt)
+	case pq.ResTarget:
+		return deparse_restarget(node, ctx)
+	case pq.SelectStmt:
+		return deparse_select(node)
+
+	case pq.String:
+		switch *ctx {
+		case A_CONST:
+			result := fmt.Sprint("'%s'", strings.Replace(node.Str, "'", "''", -1))
+			return &result, nil
+		case FUNC_CALL, TYPE_NAME:
+			return &node.Str, nil
+		default:
+			result := fmt.Sprint(`"%s"`, strings.Replace(node.Str, `"`, `""`, -1))
+			return &result, nil
+		}
+	case pq.Integer:
+		result := strconv.FormatInt(node.Ival, 10)
+		return &result, nil
 	default:
 		t := reflect.TypeOf(node).String()
 		return nil, errors.New("cannot handle node type (%s)").Format(t)
@@ -90,6 +119,15 @@ func deparse_aexpr(node pq.A_Expr, ctx *contextType) (*string, error) {
 	// 	str := strings.Join(output, " " + name + " ")
 	// }
 	return nil, nil
+}
+
+func deparse_a_const(node pq.A_Const) (*string, error) {
+	ctx := A_CONST
+	return deparse_item(node.Val, &ctx)
+}
+
+func deparse_a_star(node pq.A_Star) (*string, error) {
+	return &Star, nil
 }
 
 func deparse_insert_into(node pq.InsertStmt) (*string, error) {
@@ -118,7 +156,7 @@ func deparse_insert_into(node pq.InsertStmt) (*string, error) {
 				cols = append(cols, *str)
 			}
 		}
-		out = append(out, " (" + strings.Join(cols, ",") + ") ")
+		out = append(out, " ("+strings.Join(cols, ",")+") ")
 	}
 
 	if str, err := deparse_item(node.SelectStmt, nil); err != nil {
@@ -162,7 +200,7 @@ func deparse_select(node pq.SelectStmt) (*string, error) {
 		}
 	}
 
-	//Get select *distinct* *fields*
+	// Get select *distinct* *fields*
 	if node.TargetList.Items != nil && len(node.TargetList.Items) > 0 {
 		out = append(out, "SELECT")
 		if node.DistinctClause.Items != nil && len(node.DistinctClause.Items) > 0 {
@@ -213,7 +251,7 @@ func deparse_select(node pq.SelectStmt) (*string, error) {
 					values[i] = *str
 				}
 			}
-			out = append(out, "(" + strings.Join(values, ", ") + ")")
+			out = append(out, "("+strings.Join(values, ", ")+")")
 		}
 	}
 
@@ -270,6 +308,28 @@ func deparse_select(node pq.SelectStmt) (*string, error) {
 
 	result := strings.Join(out, " ")
 	return &result, nil
+}
+
+func deparse_restarget(node pq.ResTarget, ctx *contextType) (*string, error) {
+	if *ctx == Select {
+		out := make([]string, 0)
+		if str, err := deparse_item(node.Val, nil); err != nil {
+			return nil, err
+		} else {
+			out = append(out, *str)
+		}
+
+		if node.Name != nil && len(*node.Name) > 0 {
+			out = append(out, "AS")
+			out = append(out, *node.Name)
+		}
+		result := strings.Join(out, " ")
+		return &result, nil
+	} else if *ctx == Update {
+		return nil, nil
+	} else {
+		return nil, nil
+	}
 }
 
 // ParsePlPgSqlToJSON - Parses the given PL/pgSQL function statement into an AST (JSON format)

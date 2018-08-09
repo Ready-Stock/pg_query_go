@@ -6,11 +6,29 @@ import (
 )
 
 func Test_Deparse1(t *testing.T) {
-	tree, _ := Parse("SELECT 1")
+	input := "SELECT 1"
+	fmt.Printf("INPUT: %s\n", input)
+	tree, _ := Parse(input)
+	json, _ := tree.MarshalJSON()
+	fmt.Println(string(json))
 	if sql, err := Deparse(tree.Statements[0]); err != nil {
 		t.Error(err)
 		t.Fail()
 	} else {
-		fmt.Println(sql)
+		fmt.Printf("OUTPUT: %s\n", *sql)
+	}
+}
+
+func Test_Deparse2(t *testing.T) {
+	input := "SELECT test FROM users;"
+	fmt.Printf("INPUT: %s\n", input)
+	tree, _ := Parse(input)
+	json, _ := tree.MarshalJSON()
+	fmt.Println(string(json))
+	if sql, err := Deparse(tree.Statements[0]); err != nil {
+		t.Error(err)
+		t.Fail()
+	} else {
+		fmt.Printf("OUTPUT: %s\n", *sql)
 	}
 }
