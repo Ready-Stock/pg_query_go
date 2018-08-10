@@ -40,17 +40,17 @@ func Parse(input string) (tree *ParsetreeList, err error) {
 	return
 }
 
-type contextType string
+type contextType int64
 
 const (
-	True      contextType = "True"
-	False     contextType = "False"
-	Select    contextType = "Select"
-	Update    contextType = "Update"
-	A_CONST   contextType = "A_CONST"
-	FUNC_CALL contextType = "FUNC_CALL"
-	TYPE_NAME contextType = "TYPE_NAME"
-	Operator  contextType = "Operator"
+	True      contextType = 1
+	False     contextType = 2
+	Select    contextType = 4
+	Update    contextType = 8
+	A_CONST   contextType = 16
+	FUNC_CALL contextType = 32
+	TYPE_NAME contextType = 64
+	Operator  contextType = 128
 )
 
 var (
@@ -114,7 +114,7 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		case A_CONST:
 			result := fmt.Sprintf("'%s'", strings.Replace(node.Str, "'", "''", -1))
 			return &result, nil
-		case FUNC_CALL, TYPE_NAME:
+		case FUNC_CALL, TYPE_NAME, Operator:
 			return &node.Str, nil
 		default:
 			result := fmt.Sprintf(`"%s"`, strings.Replace(node.Str, `"`, `""`, -1))
@@ -129,6 +129,29 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 }
 
 func deparse_aexpr(node pq.A_Expr, ctx *contextType) (*string, error) {
+	out := make([]string, 0)
+	if node.Lexpr == nil {
+		return nil, errors.New("lexpr of expression cannot be null")
+	} else {
+		if str, err := deparse_item(node.Lexpr, ctx); err != nil {
+			return nil, err
+		} else {
+			out = append(out, *str)
+		}
+	}
+
+	if node.Lexpr == nil {
+		return nil, errors.New("rexpr of expression cannot be null")
+	} else {
+		if str, err := deparse_item(node.Rexpr, ctx); err != nil {
+			return nil, err
+		} else {
+			out = append(out, *str)
+		}
+	}
+
+
+
 	// output := make([]string, 0)
 	// if str, err := deparse_item(node.Lexpr, true); err != nil {
 	// 	return nil, err
@@ -157,10 +180,10 @@ func deparse_aexpr_in(node pq.A_Expr) (*string, error) {
 
 
 	// TODO (@elliotcourant) convert to handle list
-	if str, err := deparse_item(node.Rexpr, nil); err != nil {
+	if strs, err := deparse_item_list(node.Rexpr.(pq.List).Items, nil); err != nil {
 		return nil, err
 	} else {
-		out = append(out, *str)
+		out = append(out, strs...)
 	}
 
 	if node.Name.Items == nil || len(node.Name.Items) == 0 {

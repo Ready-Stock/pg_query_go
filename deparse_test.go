@@ -108,7 +108,7 @@ func Test_DeparseInsert1(t *testing.T) {
 	}
 }
 
-func Test_DeparseBigSelect(t *testing.T) {
+func Tst_DeparseBigSelect(t *testing.T) {
 	input := `
 		select t.oid,
 			case when nsp.nspname in ('pg_catalog', 'public') then t.typname
