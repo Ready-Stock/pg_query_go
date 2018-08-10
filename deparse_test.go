@@ -18,6 +18,10 @@ var (
 			"select users.user_id from users",
 			`SELECT "users"."user_id" FROM "users";`,
 		},
+		{
+			"insert into users (user_id,email) values(1, 'email@email.com') RETURNING *",
+			`INSERT INTO "users" (user_id,email) VALUES (1, 'email@email.com') RETURNING *;`,
+		},
 	}
 )
 
