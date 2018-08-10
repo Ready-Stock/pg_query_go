@@ -1,4 +1,4 @@
-# pg_query_go [![Build Status](https://travis-ci.org/lfittl/pg_query_go.svg)](https://travis-ci.org/lfittl/pg_query_go) [![GoDoc](https://godoc.org/github.com/lfittl/pg_query_go?status.svg)](https://godoc.org/github.com/lfittl/pg_query_go)
+# pg_query_go [![Build Status](https://travis-ci.org/Ready-Stock/pg_query_go.svg?branch=master)](https://travis-ci.org/Ready-Stock/pg_query_go) [![GoDoc](https://godoc.org/github.com/lfittl/pg_query_go?status.svg)](https://godoc.org/github.com/lfittl/pg_query_go)
 
 Go version of https://github.com/lfittl/pg_query
 
