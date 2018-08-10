@@ -5,6 +5,48 @@ import (
 	"fmt"
 )
 
+var (
+	queries = []struct{
+		Query string
+		Result string
+	}{
+		{
+			"select 1",
+			"SELECT 1;",
+		},
+		{
+			"select users.user_id from users",
+			`SELECT "users"."user_id" FROM "users";`,
+		},
+	}
+)
+
+func Test_Deparse(t *testing.T) {
+	for _, test := range queries {
+		if tree, err := Parse(test.Query); err != nil {
+			t.Errorf(`FAILED TO PARSE QUERY: {%s} ERROR: %s`, test.Query, err.Error())
+			t.Fail()
+			return
+		} else {
+			if sql, err := Deparse(tree.Statements[0]); err != nil {
+				t.Errorf("FAILED TO DEPARSE QUERY: {%s} ERROR: %s", test.Query, err.Error())
+				t.Fail()
+				return
+			} else {
+				if *sql != test.Result {
+					t.Errorf("ERROR, QUERY {%s} DID NOT DEPARSE INTO {%s}", test.Query, test.Result)
+				} else {
+					t.Logf("SUCCESS, INPUT: {%s} OUTPUT: {%s}", test.Query, *sql)
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
 func Test_Deparse1(t *testing.T) {
 	input := "SELECT 1"
 	fmt.Printf("INPUT: %s\n", input)
