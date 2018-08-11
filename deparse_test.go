@@ -2,8 +2,7 @@ package pg_query
 
 import (
 	"testing"
-	"fmt"
-)
+	)
 
 var (
 	queries = []struct{
@@ -57,8 +56,6 @@ func Test_Deparse(t *testing.T) {
 			} else {
 				if *sql != test.Result {
 					t.Errorf("ERROR, QUERY {%s} DID NOT DEPARSE INTO {%s}", test.Query, test.Result)
-				} else {
-					t.Logf("SUCCESS, INPUT: {%s} OUTPUT: {%s}", test.Query, *sql)
 				}
 			}
 		}
@@ -71,58 +68,38 @@ func Test_Deparse(t *testing.T) {
 
 func Test_Deparse1(t *testing.T) {
 	input := "SELECT 1"
-	fmt.Printf("INPUT: %s\n", input)
 	tree, _ := Parse(input)
-	json, _ := tree.MarshalJSON()
-	fmt.Println(string(json))
-	if sql, err := Deparse(tree.Statements[0]); err != nil {
+	if _, err := Deparse(tree.Statements[0]); err != nil {
 		t.Error(err)
 		t.Fail()
-	} else {
-		fmt.Printf("OUTPUT: %s\n", *sql)
 	}
 }
 
 func Test_Deparse2(t *testing.T) {
 	input := "SELECT test FROM users;"
-	fmt.Printf("INPUT: %s\n", input)
 	tree, _ := Parse(input)
-	json, _ := tree.MarshalJSON()
-	fmt.Println(string(json))
-	if sql, err := Deparse(tree.Statements[0]); err != nil {
+	if _, err := Deparse(tree.Statements[0]); err != nil {
 		t.Error(err)
 		t.Fail()
-	} else {
-		fmt.Printf("OUTPUT: %s\n", *sql)
 	}
 }
 
 func Test_DeparseCurrentTimestamp(t *testing.T) {
 	input := "select    current_timestamp"
-	fmt.Printf("INPUT: %s\n", input)
 	tree, _ := Parse(input)
-	json, _ := tree.MarshalJSON()
-	fmt.Println(string(json))
-	if sql, err := Deparse(tree.Statements[0]); err != nil {
+	if _, err := Deparse(tree.Statements[0]); err != nil {
 		t.Error(err)
 		t.Fail()
-	} else {
-		fmt.Printf("OUTPUT: %s\n", *sql)
 	}
 }
 
 
 func Test_DeparseInsert1(t *testing.T) {
 	input := "insert into public.users (email, password) values ('email@google.com', 'strongpassword') returning *"
-	fmt.Printf("INPUT: %s\n", input)
 	tree, _ := Parse(input)
-	json, _ := tree.MarshalJSON()
-	fmt.Println(string(json))
-	if sql, err := Deparse(tree.Statements[0]); err != nil {
+	if _, err := Deparse(tree.Statements[0]); err != nil {
 		t.Error(err)
 		t.Fail()
-	} else {
-		fmt.Printf("OUTPUT: %s\n", *sql)
 	}
 }
 
@@ -140,15 +117,10 @@ func Test_DeparseBigSelect(t *testing.T) {
 			  and (base_type.oid is null or base_type.typtype in('b', 'p', 'r'))
 			);
 		`
-	fmt.Printf("INPUT: %s\n", input)
 	tree, _ := Parse(input)
-	json, _ := tree.MarshalJSON()
-	fmt.Println(string(json))
-	if sql, err := Deparse(tree.Statements[0]); err != nil {
+	if _, err := Deparse(tree.Statements[0]); err != nil {
 		t.Error(err)
 		t.Fail()
-	} else {
-		fmt.Printf("OUTPUT: %s\n", *sql)
 	}
 }
 

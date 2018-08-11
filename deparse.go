@@ -94,6 +94,10 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_update(node)
 	case pq.WithClause:
 		return deparse_with_clause(node)
+	case pq.TypeCast:
+		return deparse_typecase(node)
+	case pq.TypeName:
+		return deparse_typename(node)
 	case pq.SQLValueFunction:
 		return deparse_sqlvaluefunction(node)
 	case pq.String:
@@ -650,7 +654,29 @@ func deparse_update(node pq.UpdateStmt) (*string, error) {
 
 	out = append(out, "UPDATE")
 
+	if node.Relation == nil {
+		return nil, errors.New("relation of update statement cannot be null")
+	}
 
+	if str, err := deparse_item(*node.Relation, nil); err != nil {
+		return nil, err
+	} else {
+		out = append(out, *str)
+	}
+
+	if node.TargetList.Items == nil || len(node.TargetList.Items) == 0 {
+		return nil, errors.New("update statement cannot have no sets")
+	}
+
+	out = append(out, "SET")
+	for _, target := range node.TargetList.Items {
+		fmt.Printf("Target Type: %s\n", reflect.TypeOf(target).Name())
+		if str, err := deparse_item(target, &_Update); err != nil {
+			return nil, err
+		} else {
+			out = append(out, *str)
+		}
+	}
 
 	return nil, nil
 }
@@ -705,7 +731,24 @@ func deparse_restarget(node pq.ResTarget, ctx *contextType) (*string, error) {
 		result := strings.Join(out, " ")
 		return &result, nil
 	} else if *ctx == Update {
-		return nil, nil
+		out := make([]string, 0)
+		if node.Name == nil || len(*node.Name) == 0 {
+			return nil, errors.New("cannot have blank name for res target in update")
+		}
+		out = append(out, *node.Name)
+
+		if node.Val == nil {
+			return nil, errors.New("cannot have null value for res target in update")
+		}
+
+		if str, err := deparse_item(node.Val, nil); err != nil {
+			return nil, err
+		} else {
+			out = append(out, *str)
+		}
+
+		result := strings.Join(out, " = ")
+		return &result, nil
 	} else {
 		return nil, nil
 	}
@@ -742,4 +785,37 @@ func deparse_when(node pq.CaseWhen) (*string, error) {
 
 	result := strings.Join(out, " ")
 	return &result, nil
+}
+
+func deparse_typecase(node pq.TypeCast) (*string, error) {
+	if node.TypeName == nil {
+		return nil, errors.New("typename cannot be null in typecast")
+	}
+	if str, err := deparse_item(*node.TypeName, nil); err != nil {
+		return nil, err
+	} else {
+		if *str == "boolean" {
+			return nil, nil
+		} else {
+			return nil, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func deparse_typename(node pq.TypeName) (*string, error) {
+	if node.Names.Items == nil || len(node.Names.Items) == 0 {
+		return nil, errors.New("cannot have no names on type name")
+	}
+	names := make([]string, len(node.Names.Items))
+	for i, name := range node.Names.Items {
+		if str, err := deparse_item(name, &_TYPE_NAME); err != nil {
+			return nil, err
+		} else {
+			names[i] = *str
+		}
+	}
+
+	return nil, nil
 }

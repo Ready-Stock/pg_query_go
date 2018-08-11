@@ -2,8 +2,7 @@ package pg_query_test
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
+		"io/ioutil"
 	"reflect"
 	"testing"
 
@@ -31,7 +30,7 @@ func TestFingerprint(t *testing.T) {
 	}
 
 	for _, test := range fingerprintTests {
-		fmt.Printf(".")
+		//fmt.Printf(".")
 
 		actualTree, err := pg_query.Parse(test.Input)
 		if err != nil {
@@ -53,5 +52,5 @@ func TestFingerprint(t *testing.T) {
 		}
 	}
 
-	fmt.Printf("\n")
+	//fmt.Printf("\n")
 }
