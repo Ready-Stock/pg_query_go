@@ -36,10 +36,10 @@ var (
 						);`,
 			`SELECT "t"."oid", CASE WHEN "nsp"."nspname" IN ('pg_catalog', 'public') THEN "t"."typname" ELSE "nsp"."nspname" || '.' || "t"."typname" END FROM "pg_type" t LEFT JOIN "pg_type" base_type ON "t"."typelem" = "base_type"."oid" LEFT JOIN "pg_namespace" nsp ON "t"."typnamespace" = "nsp"."oid" WHERE ("t"."typtype" IN ('b', 'p', 'r', 'e') OR 1 = 1) AND ("base_type"."oid" IS NULL OR "base_type"."typtype" IN ('b', 'p', 'r'));`,
 		},
-		{
-			"UPDATE users set is_enabled=true WHERE user_id='2' returning *",
-			`UPDATE "users" SET is_enabled = true WHERE "user_id" = '2' RETURNING *;`,
-		},
+		// {
+		// 	"UPDATE users set is_enabled=true WHERE user_id='2' returning *",
+		// 	`UPDATE "users" SET is_enabled = true WHERE "user_id" = '2' RETURNING *;`,
+		// },
 	}
 )
 
@@ -152,19 +152,19 @@ func Test_DeparseBigSelect(t *testing.T) {
 	}
 }
 
-func Test_DeparseUpdate(t *testing.T) {
-	input := `UPDATE users set is_enabled=true WHERE user_id='2' returning *`
-	fmt.Printf("INPUT: %s\n", input)
-	tree, _ := Parse(input)
-	json, _ := tree.MarshalJSON()
-	fmt.Println(string(json))
-	if sql, err := Deparse(tree.Statements[0]); err != nil {
-		t.Error(err)
-		t.Fail()
-	} else {
-		fmt.Printf("OUTPUT: %s\n", *sql)
-	}
-}
+// func Test_DeparseUpdate(t *testing.T) {
+// 	input := `UPDATE users set is_enabled=true WHERE user_id='2' returning *`
+// 	fmt.Printf("INPUT: %s\n", input)
+// 	tree, _ := Parse(input)
+// 	json, _ := tree.MarshalJSON()
+// 	fmt.Println(string(json))
+// 	if sql, err := Deparse(tree.Statements[0]); err != nil {
+// 		t.Error(err)
+// 		t.Fail()
+// 	} else {
+// 		fmt.Printf("OUTPUT: %s\n", *sql)
+// 	}
+// }
 
 
 
