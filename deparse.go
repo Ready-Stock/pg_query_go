@@ -54,7 +54,7 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	case pq.A_Const:
 		return deparse_a_const(node)
 	case pq.A_Star:
-		return deparse_a_star(node)
+		return deparse_a_star()
 	case pq.BoolExpr:
 		//There is no BOOL_EXPR_NOT in go for some reason?
 		switch node.Boolop {
@@ -233,7 +233,7 @@ func deparse_a_const(node pq.A_Const) (*string, error) {
 	return deparse_item(node.Val, &_A_CONST)
 }
 
-func deparse_a_star(node pq.A_Star) (*string, error) {
+func deparse_a_star() (*string, error) {
 	return &Star, nil
 }
 
