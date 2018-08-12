@@ -817,5 +817,72 @@ func deparse_typename(node pq.TypeName) (*string, error) {
 		}
 	}
 
+	// Intervals are tricky and should be handled in a seperate method because they require some bitmask operations
+	if reflect.DeepEqual(names, []string {"pg_catalog", "interval"}) {
+		return deparse_interval_type(node)
+	}
+
+	out := make([]string, 0)
+	if node.Setof {
+		out = append(out, "SETOF")
+	}
+
+	if node.Typmods.Items != nil && len(node.Typmods.Items) > 0 {
+		arguments := make([]string, len(node.Typmods.Items))
+		for i, arg := range node.Typmods.Items {
+			if str, err := deparse_item(arg, nil); err != nil {
+				return nil, err
+			} else {
+				arguments[i] = *str
+			}
+		}
+		out = append(out, strings.Join(arguments, ", "))
+	}
+
+
+
+	return nil, nil
+}
+
+func deparse_typename_cast(names []string, arguments []string) (*string, error) {
+	if len(names) != 2 {
+		return nil, errors.New("invalid name length, != 2 (%d)").Format(len(names))
+	}
+	c, t := names[0], names[1]
+	if c != "pg_catalog" {
+		result := strings.Join(names, ".")
+		return &result, nil
+	}
+
+	switch t {
+	case "bpchar":
+	case "varchar":
+	case "numeric":
+	case "bool":
+	case "int2":
+	case "int4":
+	case "int8":
+	case "real", "float4":
+	case "float8":
+
+	case "time":
+		result := "time"
+		return &result, nil
+	case "timezt":
+		result := "time with time zone"
+		return &result, nil
+	case "timestamp":
+		result := "timestamp"
+		return &result, nil
+	case "timestamptz":
+		result := "timestamp with time zone"
+		return &result, nil
+	default:
+		return nil, errors.New("cannot deparse type: %s").Format(t)
+	}
+	return nil, nil
+}
+
+func deparse_interval_type(node pq.TypeName) (*string, error) {
 	return nil, nil
 }

@@ -124,19 +124,33 @@ func Test_DeparseBigSelect(t *testing.T) {
 	}
 }
 
-// func Test_DeparseUpdate(t *testing.T) {
-// 	input := `UPDATE users set is_enabled=true WHERE user_id='2' returning *`
-// 	fmt.Printf("INPUT: %s\n", input)
-// 	tree, _ := Parse(input)
-// 	json, _ := tree.MarshalJSON()
-// 	fmt.Println(string(json))
-// 	if sql, err := Deparse(tree.Statements[0]); err != nil {
-// 		t.Error(err)
-// 		t.Fail()
-// 	} else {
-// 		fmt.Printf("OUTPUT: %s\n", *sql)
-// 	}
-// }
+//func Test_DeparseUpdate(t *testing.T) {
+//	input := `UPDATE users set is_enabled=true WHERE user_id='2' returning *`
+//	fmt.Printf("INPUT: %s\n", input)
+//	tree, _ := Parse(input)
+//	json, _ := tree.MarshalJSON()
+//	fmt.Println(string(json))
+//	if sql, err := Deparse(tree.Statements[0]); err != nil {
+//		t.Error(err)
+//		t.Fail()
+//	} else {
+//		fmt.Printf("OUTPUT: %s\n", *sql)
+//	}
+//}
+//
+//func Test_DeparseUpdateInterval(t *testing.T) {
+//	input := `UPDATE users set is_enabled=interval '2 months ago' WHERE user_id='2' returning *`
+//	fmt.Printf("INPUT: %s\n", input)
+//	tree, _ := Parse(input)
+//	json, _ := tree.MarshalJSON()
+//	fmt.Println(string(json))
+//	if sql, err := Deparse(tree.Statements[0]); err != nil {
+//		t.Error(err)
+//		t.Fail()
+//	} else {
+//		fmt.Printf("OUTPUT: %s\n", *sql)
+//	}
+//}
 
 
 
