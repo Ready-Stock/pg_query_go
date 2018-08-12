@@ -7,7 +7,7 @@ import (
 	"reflect"
 	pq "github.com/Ready-Stock/pg_query_go/nodes"
 	"github.com/kataras/go-errors"
-)
+	)
 
 type contextType int64
 
@@ -95,7 +95,7 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	case pq.WithClause:
 		return deparse_with_clause(node)
 	case pq.TypeCast:
-		return deparse_typecase(node)
+		return deparse_typecast(node)
 	case pq.TypeName:
 		return deparse_typename(node)
 	case pq.SQLValueFunction:
@@ -113,6 +113,11 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		}
 	case pq.Integer:
 		result := strconv.FormatInt(node.Ival, 10)
+		return &result, nil
+	case pq.Float:
+		return &node.Str, nil
+	case pq.Null:
+		result := "NULL"
 		return &result, nil
 	default:
 		return nil, errors.New("cannot handle node type (%s)").Format(reflect.TypeOf(node).String())
@@ -668,17 +673,41 @@ func deparse_update(node pq.UpdateStmt) (*string, error) {
 		return nil, errors.New("update statement cannot have no sets")
 	}
 
-	out = append(out, "SET")
-	for _, target := range node.TargetList.Items {
-		fmt.Printf("Target Type: %s\n", reflect.TypeOf(target).Name())
-		if str, err := deparse_item(target, &_Update); err != nil {
+	if node.TargetList.Items != nil && len(node.TargetList.Items) > 0 {
+		out = append(out, "SET")
+		for _, target := range node.TargetList.Items {
+			if str, err := deparse_item(target, &_Update); err != nil {
+				return nil, err
+			} else {
+				out = append(out, *str)
+			}
+		}
+	}
+
+	if node.WhereClause != nil {
+		out = append(out, "WHERE")
+		if str, err := deparse_item(node.WhereClause, nil); err != nil {
 			return nil, err
 		} else {
 			out = append(out, *str)
 		}
 	}
 
-	return nil, nil
+	if node.ReturningList.Items != nil && len(node.ReturningList.Items) > 0 {
+		out = append(out, "RETURNING")
+		returning := make([]string, len(node.ReturningList.Items))
+		for i, slct := range node.ReturningList.Items {
+			if str, err := deparse_item(slct, &_Select); err != nil {
+				return nil, err
+			} else {
+				returning[i] = *str
+			}
+		}
+		out = append(out, strings.Join(returning, ", "))
+	}
+
+	result := strings.Join(out, " ")
+	return &result, nil
 }
 
 func deparse_sqlvaluefunction(node pq.SQLValueFunction) (*string, error) {
@@ -787,21 +816,34 @@ func deparse_when(node pq.CaseWhen) (*string, error) {
 	return &result, nil
 }
 
-func deparse_typecase(node pq.TypeCast) (*string, error) {
+func deparse_typecast(node pq.TypeCast) (*string, error) {
 	if node.TypeName == nil {
 		return nil, errors.New("typename cannot be null in typecast")
 	}
 	if str, err := deparse_item(*node.TypeName, nil); err != nil {
 		return nil, err
 	} else {
-		if *str == "boolean" {
-			return nil, nil
+		if val, err := deparse_item(node.Arg, nil); err != nil {
+			return nil, err
 		} else {
-			return nil, nil
+			if *str == "boolean" {
+				if *val == "'t'" {
+					result := "true"
+					return &result, nil
+				} else {
+					result := "false"
+					return &result, nil
+				}
+			} else {
+				if typename, err := deparse_typename(*node.TypeName); err != nil {
+					return nil, err
+				} else {
+					result := fmt.Sprintf("%s::%s", *val, *typename)
+					return &result, nil
+				}
+			}
 		}
 	}
-
-	return nil, nil
 }
 
 func deparse_typename(node pq.TypeName) (*string, error) {
@@ -827,6 +869,7 @@ func deparse_typename(node pq.TypeName) (*string, error) {
 		out = append(out, "SETOF")
 	}
 
+	args := ""
 	if node.Typmods.Items != nil && len(node.Typmods.Items) > 0 {
 		arguments := make([]string, len(node.Typmods.Items))
 		for i, arg := range node.Typmods.Items {
@@ -836,35 +879,72 @@ func deparse_typename(node pq.TypeName) (*string, error) {
 				arguments[i] = *str
 			}
 		}
-		out = append(out, strings.Join(arguments, ", "))
+		args = strings.Join(arguments, ", ")
 	}
 
+	if str, err := deparse_typename_cast(names, args); err != nil {
+		return nil, err
+	} else {
+		out = append(out, *str)
+	}
 
+	if node.ArrayBounds.Items != nil || len(node.ArrayBounds.Items) > 0 {
+		out[len(out) - 1] = fmt.Sprintf("%s[]", out[len(out) - 1])
+	}
 
-	return nil, nil
+	result := strings.Join(out, ", ")
+	return &result, nil
 }
 
-func deparse_typename_cast(names []string, arguments []string) (*string, error) {
-	if len(names) != 2 {
-		return nil, errors.New("invalid name length, != 2 (%d)").Format(len(names))
-	}
-	c, t := names[0], names[1]
-	if c != "pg_catalog" {
+func deparse_typename_cast(names []string, arguments string) (*string, error) {
+	if names[0] != "pg_catalog" {
 		result := strings.Join(names, ".")
 		return &result, nil
 	}
 
-	switch t {
+	switch names[len(names) - 1] {
 	case "bpchar":
+		if len(arguments) == 0 {
+			result := "char"
+			return &result, nil
+		} else {
+			result := fmt.Sprintf("char(%s)", arguments)
+			return &result, nil
+		}
 	case "varchar":
+		if len(arguments) == 0 {
+			result := "varchar"
+			return &result, nil
+		} else {
+			result := fmt.Sprintf("varchar(%s)", arguments)
+			return &result, nil
+		}
 	case "numeric":
+		if len(arguments) == 0 {
+			result := "numeric"
+			return &result, nil
+		} else {
+			result := fmt.Sprintf("numeric(%s)", arguments)
+			return &result, nil
+		}
 	case "bool":
+		result := "boolean"
+		return &result, nil
 	case "int2":
+		result := "smallint"
+		return &result, nil
 	case "int4":
+		result := "int"
+		return &result, nil
 	case "int8":
+		result := "bigint"
+		return &result, nil
 	case "real", "float4":
+		result := "real"
+		return &result, nil
 	case "float8":
-
+		result := "double"
+		return &result, nil
 	case "time":
 		result := "time"
 		return &result, nil
@@ -878,11 +958,21 @@ func deparse_typename_cast(names []string, arguments []string) (*string, error) 
 		result := "timestamp with time zone"
 		return &result, nil
 	default:
-		return nil, errors.New("cannot deparse type: %s").Format(t)
+		return nil, errors.New("cannot deparse type: %s").Format(names[len(names) - 1])
 	}
 	return nil, nil
 }
 
 func deparse_interval_type(node pq.TypeName) (*string, error) {
-	return nil, nil
+	out := []string{ "interval" }
+
+	if node.Typmods.Items != nil && len(node.Typmods.Items) > 0 {
+		return nil, nil
+		// In the ruby version of this code this was here to
+		// handle `interval hour to second(5)` but i've not
+		// ever seen that syntax and will come back to it
+	}
+
+	result := strings.Join(out, " ")
+	return &result, nil
 }
