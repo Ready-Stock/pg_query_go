@@ -8,3 +8,4 @@ tmp/*
 .idea/vcs.xml
 .idea/workspace.xml
 parser/.DS_Store
+.DS_Store
