@@ -3,6 +3,8 @@ package pg_query
 import (
 	"testing"
 	"fmt"
+	"github.com/Ready-Stock/pg_query_go/nodes"
+	"reflect"
 )
 
 var (
@@ -73,6 +75,17 @@ func Test_Deparse1(t *testing.T) {
 	if _, err := Deparse(tree.Statements[0]); err != nil {
 		t.Error(err)
 		t.Fail()
+	}
+}
+
+func Test_StmtParse1(t *testing.T) {
+	input := "SET extra_float_digits = 3"
+	tree, _ := Parse(input)
+	switch s:= tree.Statements[0].(pg_query.RawStmt).Stmt.(type) {
+	case pg_query.Stmt:
+		fmt.Println("success")
+	default:
+		t.Errorf("not a stmt: %s", reflect.TypeOf(s).Name())
 	}
 }
 

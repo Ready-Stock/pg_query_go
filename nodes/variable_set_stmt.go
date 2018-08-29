@@ -5,6 +5,7 @@ package pg_query
 import "encoding/json"
 
 type VariableSetStmt struct {
+	Stmt
 	Kind    VariableSetKind `json:"kind"`
 	Name    *string         `json:"name"`     /* variable to be set */
 	Args    List            `json:"args"`     /* List of A_Const nodes */
