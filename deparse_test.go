@@ -1,10 +1,11 @@
 package pg_query
 
 import (
-	"testing"
+	json2 "encoding/json"
 	"fmt"
 	"github.com/Ready-Stock/pg_query_go/nodes"
 	"reflect"
+	"testing"
 )
 
 var (
@@ -87,6 +88,17 @@ func Test_StmtParse1(t *testing.T) {
 	default:
 		t.Errorf("not a stmt: %s", reflect.TypeOf(s).Name())
 	}
+}
+//
+
+func Test_WierdParse1(t *testing.T) {
+	input := "select current_database() as a, current_schemas(false) as b"
+	tree, err := Parse(input)
+	if err != nil {
+		t.Error(err)
+	}
+	j, _ := json2.Marshal(tree)
+	fmt.Println(string(j))
 }
 
 func Test_Deparse2(t *testing.T) {
