@@ -100,6 +100,8 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_typename(node)
 	case pq.SQLValueFunction:
 		return deparse_sqlvaluefunction(node)
+	case pq.VariableSetStmt:
+		return deparse_variable_set(node)
 	case pq.String:
 		switch *ctx {
 		case A_CONST:
@@ -120,7 +122,7 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		result := "NULL"
 		return &result, nil
 	default:
-		return nil, errors.New("cannot handle node type (%s)").Format(reflect.TypeOf(node).String())
+		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
 }
 
@@ -975,4 +977,9 @@ func deparse_interval_type(node pq.TypeName) (*string, error) {
 
 	result := strings.Join(out, " ")
 	return &result, nil
+}
+
+func deparse_variable_set(node pq.VariableSetStmt) (*string, error) {
+
+	return nil, nil
 }
