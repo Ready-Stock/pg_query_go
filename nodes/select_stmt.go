@@ -18,6 +18,7 @@ import "encoding/json"
  * ----------------------
  */
 type SelectStmt struct {
+	Stmt
 	/*
 	 * These fields are used only in "leaf" SelectStmts.
 	 */
@@ -62,6 +63,10 @@ type SelectStmt struct {
 
 	/* Eventually add fields for CORRESPONDING spec here */
 }
+
+func (node SelectStmt) StatementType() StmtType { return Rows }
+
+func (node SelectStmt) StatementTag() string { return "SELECT" }
 
 func (node SelectStmt) MarshalJSON() ([]byte, error) {
 	type SelectStmtMarshalAlias SelectStmt
