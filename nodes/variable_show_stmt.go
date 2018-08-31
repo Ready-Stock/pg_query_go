@@ -2,15 +2,22 @@
 
 package pg_query
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 /* ----------------------
  * Show Statement
  * ----------------------
  */
 type VariableShowStmt struct {
+	Stmt
 	Name *string `json:"name"`
 }
+
+func (node VariableShowStmt) StatementType() StmtType { return Ack }
+
+func (node VariableShowStmt) StatementTag() string { return "SHOW" }
 
 func (node VariableShowStmt) MarshalJSON() ([]byte, error) {
 	type VariableShowStmtMarshalAlias VariableShowStmt

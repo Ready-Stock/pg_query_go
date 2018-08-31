@@ -1,10 +1,7 @@
 package pg_query
 
 import (
-	json2 "encoding/json"
 	"fmt"
-	"github.com/Ready-Stock/pg_query_go/nodes"
-	"reflect"
 	"testing"
 )
 
@@ -77,28 +74,6 @@ func Test_Deparse1(t *testing.T) {
 		t.Error(err)
 		t.Fail()
 	}
-}
-
-func Test_StmtParse1(t *testing.T) {
-	input := "SET extra_float_digits = 3"
-	tree, _ := Parse(input)
-	switch s:= tree.Statements[0].(pg_query.RawStmt).Stmt.(type) {
-	case pg_query.Stmt:
-		fmt.Println("success")
-	default:
-		t.Errorf("not a stmt: %s", reflect.TypeOf(s).Name())
-	}
-}
-//
-
-func Test_WierdParse1(t *testing.T) {
-	input := "select current_database() as a, current_schemas(false) as b"
-	tree, err := Parse(input)
-	if err != nil {
-		t.Error(err)
-	}
-	j, _ := json2.Marshal(tree)
-	fmt.Println(string(j))
 }
 
 func Test_Deparse2(t *testing.T) {
@@ -206,6 +181,33 @@ func Test_DeparseUpdateArray(t *testing.T) {
 	}
 }
 
+func Test_DeparseVariableSetStmt1(t *testing.T) {
+	input := `SET extra_float_digits = 3`
+	fmt.Printf("INPUT: %s\n", input)
+	tree, _ := Parse(input)
+	json, _ := tree.MarshalJSON()
+	fmt.Println(string(json))
+	if sql, err := Deparse(tree.Statements[0]); err != nil {
+		t.Error(err)
+		t.Fail()
+	} else {
+		fmt.Printf("OUTPUT: %s\n", *sql)
+	}
+}
+
+func Test_DeparseVariableShowStmt1(t *testing.T) {
+	input := `SHOW TRANSACTION ISOLATION LEVEL`
+	fmt.Printf("INPUT: %s\n", input)
+	tree, _ := Parse(input)
+	json, _ := tree.MarshalJSON()
+	fmt.Println(string(json))
+	if sql, err := Deparse(tree.Statements[0]); err != nil {
+		t.Error(err)
+		t.Fail()
+	} else {
+		fmt.Printf("OUTPUT: %s\n", *sql)
+	}
+}
 
 
 
