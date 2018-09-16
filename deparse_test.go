@@ -195,8 +195,12 @@ func Test_DeparseVariableSetStmt1(t *testing.T) {
 	}
 }
 
-func Test_DeparseVariableShowStmt1(t *testing.T) {
-	input := `SHOW TRANSACTION ISOLATION LEVEL`
+
+func Test_DeparseCreateStmt(t *testing.T) {
+	input := `CREATE TABLE test (
+			  	id INT,
+			  	name TEXT
+			  );`
 	fmt.Printf("INPUT: %s\n", input)
 	tree, _ := Parse(input)
 	json, _ := tree.MarshalJSON()

@@ -86,6 +86,12 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_when(node)
 	case pq.ColumnRef:
 		return deparse_columnref(node)
+	case pq.ColumnDef:
+		return deparse_columndef(node)
+	case pq.Constraint:
+		return deparse_constraint(node)
+	case pq.CreateStmt:
+		return deparse_create_table(node)
 	case pq.InsertStmt:
 		return deparse_insert_into(node)
 	case pq.JoinExpr:
@@ -352,6 +358,43 @@ func deparse_columnref(node pq.ColumnRef) (*string, error) {
 	}
 	result := strings.Join(out, ".")
 	return &result, nil
+}
+
+func deparse_columndef(node pq.ColumnDef) (*string, error) {
+	out := []string{ *node.Colname }
+
+	if str, err := deparse_item(*node.TypeName, nil); err != nil {
+		return nil, err
+	} else {
+		out = append(out, *str)
+	}
+
+	if node.RawDefault != nil {
+		out = append(out, "USING")
+		if str, err := deparse_item(node.RawDefault, nil); err != nil {
+			return nil, err
+		} else {
+			out = append(out, *str)
+		}
+	}
+
+	if node.Constraints.Items != nil && len(node.Constraints.Items) > 0 {
+		constraints := make([]string, len(node.Constraints.Items))
+		for i, constraint := range node.Constraints.Items {
+			if str, err := deparse_item(constraint, nil); err != nil {
+				return nil, err
+			} else {
+				constraints[i] = *str
+			}
+		}
+		out = append(out, constraints...)
+	}
+	result := strings.Join(out, " ")
+	return &result, nil
+}
+
+func deparse_constraint(node pq.Constraint) (*string, error) {
+	return nil, nil
 }
 
 func deparse_rangevar(node pq.RangeVar) (*string, error) {
@@ -812,6 +855,63 @@ func deparse_item_list(nodes []pq.Node, ctx *contextType) ([]string, error) {
 		}
 	}
 	return out, nil
+}
+
+func deparse_create_table(node pq.CreateStmt) (*string, error)  {
+	out := []string{"CREATE"}
+	persistance := relpersistence(*node.Relation)
+	if persistance != nil {
+		out = append(out, *persistance)
+	}
+
+	out = append(out, "TABLE")
+
+	if node.IfNotExists {
+		out = append(out, "IF NOT EXISTS")
+	}
+
+	if str, err := deparse_item(*node.Relation, nil); err != nil {
+		return nil, err
+	} else {
+		out = append(out, *str)
+	}
+
+	elts := make([]string, len(node.TableElts.Items))
+	for i, elt := range node.TableElts.Items {
+		if str, err := deparse_item(elt, nil); err != nil {
+			return nil, err
+		} else {
+			elts[i] = *str
+		}
+	}
+	out = append(out, fmt.Sprintf("(%s)", strings.Join(elts, ", ")))
+
+	if node.InhRelations.Items != nil && len(node.InhRelations.Items) > 0 {
+		out = append(out, "INHERITS")
+		relations := make([]string, len(node.InhRelations.Items))
+		for i, relation := range node.InhRelations.Items {
+			if str, err := deparse_item(relation, nil); err != nil {
+				return nil, err
+			} else {
+				relations[i] = *str
+			}
+		}
+		out = append(out, fmt.Sprintf("(%s)", strings.Join(relations, ", ")))
+	}
+
+	result := strings.Join(out, " ")
+	return &result, nil
+}
+
+func relpersistence(relation pq.RangeVar) (*string) {
+	t, u := "TEMPORARY", "UNLOGGED"
+
+	if string(relation.Relpersistence) == "t" {
+		return &t
+	} else if string(relation.Relpersistence) == "u" {
+		return &u
+	}
+	return nil
 }
 
 func deparse_when(node pq.CaseWhen) (*string, error) {
