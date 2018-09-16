@@ -38,6 +38,21 @@ func Deparse(node pq.Node) (*string, error) {
 	return deparse_item(node, nil)
 }
 
+func DeparseValue(aconst pq.A_Const) (interface{}, error){
+	switch c := aconst.Val.(type) {
+	case pq.String:
+		return c.Str, nil
+	case pq.Integer:
+		return c.Ival, nil
+	case pq.Null:
+		return nil, nil
+	default:
+		return nil, errors.New("cannot parse type %s").Format(reflect.TypeOf(c).Name())
+	}
+}
+
+
+
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
 	case pq.A_Expr:

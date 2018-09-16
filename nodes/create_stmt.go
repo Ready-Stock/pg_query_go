@@ -30,6 +30,10 @@ type CreateStmt struct {
 	IfNotExists    bool                `json:"if_not_exists"`  /* just do nothing if it already exists? */
 }
 
+func (node CreateStmt) StatementType() StmtType { return DDL }
+
+func (node CreateStmt) StatementTag() string { return "CREATE TABLE" }
+
 func (node CreateStmt) MarshalJSON() ([]byte, error) {
 	type CreateStmtMarshalAlias CreateStmt
 	return json.Marshal(map[string]interface{}{
