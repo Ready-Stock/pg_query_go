@@ -213,5 +213,24 @@ func Test_DeparseCreateStmt(t *testing.T) {
 	}
 }
 
+func Test_Begin(t *testing.T) {
+	input := `prepare transaction '12345';`
+	fmt.Printf("INPUT: %s\n", input)
+	tree, err := Parse(input)
+	if err != nil {
+		t.Error(err)
+		t.Fail()
+		return
+	}
+	json, _ := tree.MarshalJSON()
+	fmt.Println(string(json))
+	if sql, err := Deparse(tree.Statements[0]); err != nil {
+		t.Error(err)
+		t.Fail()
+	} else {
+		fmt.Printf("OUTPUT: %s\n", *sql)
+	}
+}
+
 
 

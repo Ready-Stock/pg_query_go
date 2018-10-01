@@ -14,6 +14,23 @@ type TransactionStmt struct {
 	Gid     *string             `json:"gid"`     /* for two-phase-commit related commands */
 }
 
+var transactionCmds = map[TransactionStmtKind]string{
+	TRANS_STMT_BEGIN:             "BEGIN",
+	TRANS_STMT_START:             "BEGIN",
+	TRANS_STMT_COMMIT:            "COMMIT",
+	TRANS_STMT_ROLLBACK:          "ROLLBACK",
+	TRANS_STMT_SAVEPOINT:         "SAVEPOINT",
+	TRANS_STMT_RELEASE:           "RELEASE",
+	TRANS_STMT_ROLLBACK_TO:       "ROLLBACK",
+	TRANS_STMT_PREPARE:           "PREPARE TRANSACTION",
+	TRANS_STMT_COMMIT_PREPARED:   "COMMIT TRANSACTION",
+	TRANS_STMT_ROLLBACK_PREPARED: "ROLLBACK TRANSACTION",
+}
+
+func (node TransactionStmt) StatementType() StmtType { return Ack }
+
+func (node TransactionStmt) StatementTag() string { return transactionCmds[node.Kind] }
+
 func (node TransactionStmt) MarshalJSON() ([]byte, error) {
 	type TransactionStmtMarshalAlias TransactionStmt
 	return json.Marshal(map[string]interface{}{

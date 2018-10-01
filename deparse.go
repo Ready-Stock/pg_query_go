@@ -1,13 +1,13 @@
 package pg_query
 
 import (
-	"strings"
 	"fmt"
-	"strconv"
-	"reflect"
 	pq "github.com/Ready-Stock/pg_query_go/nodes"
 	"github.com/kataras/go-errors"
-	)
+	"reflect"
+	"strconv"
+	"strings"
+)
 
 type contextType int64
 
@@ -38,7 +38,7 @@ func Deparse(node pq.Node) (*string, error) {
 	return deparse_item(node, nil)
 }
 
-func DeparseValue(aconst pq.A_Const) (interface{}, error){
+func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 	switch c := aconst.Val.(type) {
 	case pq.String:
 		return c.Str, nil
@@ -50,8 +50,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error){
 		return nil, errors.New("cannot parse type %s").Format(reflect.TypeOf(c).Name())
 	}
 }
-
-
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
@@ -71,7 +69,7 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	case pq.A_Star:
 		return deparse_a_star()
 	case pq.BoolExpr:
-		//There is no BOOL_EXPR_NOT in go for some reason?
+		// There is no BOOL_EXPR_NOT in go for some reason?
 		switch node.Boolop {
 		case pq.AND_EXPR:
 			return deparse_bool_expr_and(node)
@@ -119,6 +117,8 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_typecast(node)
 	case pq.TypeName:
 		return deparse_typename(node)
+	case pq.TransactionStmt:
+		return deparse_transaction(node)
 	case pq.SQLValueFunction:
 		return deparse_sqlvaluefunction(node)
 	case pq.VariableSetStmt:
@@ -204,7 +204,6 @@ func deparse_aexpr_in(node pq.A_Expr) (*string, error) {
 	if node.Rexpr == nil {
 		return nil, errors.New("rexpr of IN expression cannot be null")
 	}
-
 
 	// TODO (@elliotcourant) convert to handle list
 	if strs, err := deparse_item_list(node.Rexpr.(pq.List).Items, nil); err != nil {
@@ -293,7 +292,7 @@ func deparse_bool_expr_or(node pq.BoolExpr) (*string, error) {
 			return nil, err
 		} else {
 			t := reflect.TypeOf(arg)
-			if t == reflect.TypeOf(pq.BoolExpr{}) && (arg.(pq.BoolExpr).Boolop == pq.OR_EXPR || arg.(pq.BoolExpr).Boolop == pq.AND_EXPR)  {
+			if t == reflect.TypeOf(pq.BoolExpr{}) && (arg.(pq.BoolExpr).Boolop == pq.OR_EXPR || arg.(pq.BoolExpr).Boolop == pq.AND_EXPR) {
 				args[i] = fmt.Sprintf("(%s)", *str)
 			} else {
 				args[i] = *str
@@ -361,7 +360,7 @@ func deparse_columnref(node pq.ColumnRef) (*string, error) {
 }
 
 func deparse_columndef(node pq.ColumnDef) (*string, error) {
-	out := []string{ *node.Colname }
+	out := []string{*node.Colname}
 
 	if str, err := deparse_item(*node.TypeName, nil); err != nil {
 		return nil, err
@@ -857,7 +856,7 @@ func deparse_item_list(nodes []pq.Node, ctx *contextType) ([]string, error) {
 	return out, nil
 }
 
-func deparse_create_table(node pq.CreateStmt) (*string, error)  {
+func deparse_create_table(node pq.CreateStmt) (*string, error) {
 	out := []string{"CREATE"}
 	persistance := relpersistence(*node.Relation)
 	if persistance != nil {
@@ -935,6 +934,43 @@ func deparse_when(node pq.CaseWhen) (*string, error) {
 	return &result, nil
 }
 
+var transactionCmds = map[pq.TransactionStmtKind]string{
+	pq.TRANS_STMT_BEGIN:             "BEGIN",
+	pq.TRANS_STMT_START:             "BEGIN",
+	pq.TRANS_STMT_COMMIT:            "COMMIT",
+	pq.TRANS_STMT_ROLLBACK:          "ROLLBACK",
+	pq.TRANS_STMT_SAVEPOINT:         "SAVEPOINT",
+	pq.TRANS_STMT_RELEASE:           "RELEASE",
+	pq.TRANS_STMT_ROLLBACK_TO:       "ROLLBACK TO SAVEPOINT",
+	pq.TRANS_STMT_PREPARE:           "PREPARE TRANSACTION",
+	pq.TRANS_STMT_COMMIT_PREPARED:   "COMMIT TRANSACTION",
+	pq.TRANS_STMT_ROLLBACK_PREPARED: "ROLLBACK TRANSACTION",
+}
+
+func deparse_transaction(node pq.TransactionStmt) (*string, error) {
+	out := make([]string, 0)
+	if kind, ok := transactionCmds[node.Kind]; !ok {
+		return nil, errors.New("couldn't deparse transaction kind: %s").Format(node.Kind)
+	} else {
+		out = append(out, kind)
+	}
+
+	if node.Kind == pq.TRANS_STMT_PREPARE ||
+		node.Kind == pq.TRANS_STMT_COMMIT_PREPARED ||
+		node.Kind == pq.TRANS_STMT_ROLLBACK_PREPARED {
+		if node.Gid != nil {
+			out = append(out, fmt.Sprintf("'%s'", *node.Gid))
+		}
+	} else {
+		if node.Options.Items != nil && len(node.Options.Items) > 0 {
+
+		}
+	}
+
+	result := strings.Join(out, " ")
+	return &result, nil
+}
+
 func deparse_typecast(node pq.TypeCast) (*string, error) {
 	if node.TypeName == nil {
 		return nil, errors.New("typename cannot be null in typecast")
@@ -979,7 +1015,7 @@ func deparse_typename(node pq.TypeName) (*string, error) {
 	}
 
 	// Intervals are tricky and should be handled in a seperate method because they require some bitmask operations
-	if reflect.DeepEqual(names, []string {"pg_catalog", "interval"}) {
+	if reflect.DeepEqual(names, []string{"pg_catalog", "interval"}) {
 		return deparse_interval_type(node)
 	}
 
@@ -1008,7 +1044,7 @@ func deparse_typename(node pq.TypeName) (*string, error) {
 	}
 
 	if node.ArrayBounds.Items != nil || len(node.ArrayBounds.Items) > 0 {
-		out[len(out) - 1] = fmt.Sprintf("%s[]", out[len(out) - 1])
+		out[len(out)-1] = fmt.Sprintf("%s[]", out[len(out)-1])
 	}
 
 	result := strings.Join(out, ", ")
@@ -1021,7 +1057,7 @@ func deparse_typename_cast(names []string, arguments string) (*string, error) {
 		return &result, nil
 	}
 
-	switch names[len(names) - 1] {
+	switch names[len(names)-1] {
 	case "bpchar":
 		if len(arguments) == 0 {
 			result := "char"
@@ -1077,13 +1113,13 @@ func deparse_typename_cast(names []string, arguments string) (*string, error) {
 		result := "timestamp with time zone"
 		return &result, nil
 	default:
-		return nil, errors.New("cannot deparse type: %s").Format(names[len(names) - 1])
+		return nil, errors.New("cannot deparse type: %s").Format(names[len(names)-1])
 	}
 	return nil, nil
 }
 
 func deparse_interval_type(node pq.TypeName) (*string, error) {
-	out := []string{ "interval" }
+	out := []string{"interval"}
 
 	if node.Typmods.Items != nil && len(node.Typmods.Items) > 0 {
 		return nil, nil
@@ -1097,7 +1133,7 @@ func deparse_interval_type(node pq.TypeName) (*string, error) {
 }
 
 func deparse_variable_set_stmt(node pq.VariableSetStmt) (*string, error) {
-	out := []string{ "SET" }
+	out := []string{"SET"}
 	if node.IsLocal {
 		out = append(out, "LOCAL")
 	}
@@ -1113,7 +1149,7 @@ func deparse_variable_set_stmt(node pq.VariableSetStmt) (*string, error) {
 }
 
 func deparse_variable_show_stmt(node pq.VariableShowStmt) (*string, error) {
-	out := []string{ "SHOW" }
+	out := []string{"SHOW"}
 	out = append(out, *node.Name)
 	result := strings.Join(out, " ")
 	return &result, nil
