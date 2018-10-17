@@ -393,7 +393,79 @@ func deparse_columndef(node pq.ColumnDef) (*string, error) {
 }
 
 func deparse_constraint(node pq.Constraint) (*string, error) {
-	return nil, nil
+	out := make([]string, 0)
+	if node.Conname != nil {
+		out = append(out, "CONSTRAINT")
+		out = append(out, *node.Conname)
+	}
+	switch node.Contype {
+	case pq.CONSTR_NULL:
+		out = append(out, "NULL")
+	case pq.CONSTR_NOTNULL:
+		out = append(out, "NOT NULL")
+	case pq.CONSTR_DEFAULT:
+		out = append(out, "DEFAULT")
+	case pq.CONSTR_CHECK:
+		out = append(out, "CHECK")
+	case pq.CONSTR_PRIMARY:
+		out = append(out, "PRIMARY KEY")
+	case pq.CONSTR_UNIQUE:
+		out = append(out, "UNIQUE")
+	case pq.CONSTR_EXCLUSION:
+		out = append(out, "EXCLUSION")
+	case pq.CONSTR_FOREIGN:
+		out = append(out, "FOREIGN KEY")
+	}
+
+	if node.RawExpr != nil {
+		if expr, err := deparse_item(node.RawExpr, nil); err != nil {
+			return nil, err
+		} else {
+			if aexpr, ok := node.RawExpr.(pq.A_Expr); ok && aexpr.Kind == pq.AEXPR_OP {
+				out = append(out, fmt.Sprintf("(%s)", *expr))
+			} else {
+				out = append(out, *expr)
+			}
+		}
+	}
+
+	if node.Keys.Items != nil && len(node.Keys.Items) > 0 {
+		if list, err := deparse_item_list(node.Keys.Items, nil); err != nil {
+			return nil, err
+		} else {
+			out = append(out, fmt.Sprintf("(%s)", strings.Join(list, ", ")))
+		}
+	}
+
+	if node.FkAttrs.Items != nil && len(node.FkAttrs.Items) > 0 {
+		if list, err := deparse_item_list(node.FkAttrs.Items, nil); err != nil {
+			return nil, err
+		} else {
+			out = append(out, fmt.Sprintf("(%s)", strings.Join(list, ", ")))
+		}
+	}
+
+	if node.Pktable != nil {
+		if list, err := deparse_item_list(node.PkAttrs.Items, nil); err != nil {
+			return nil, err
+		} else {
+			if pk, err := deparse_item(node.Pktable, nil); err != nil {
+				return nil, err
+			} else {
+				out = append(out, fmt.Sprintf("REFERENCES %s (%s)", *pk, strings.Join(list, ", ")))
+			}
+		}
+	}
+
+	if node.SkipValidation {
+		out = append(out, "NOT VALID")
+	}
+
+	if node.Indexname != nil {
+		out = append(out, fmt.Sprintf("USING INDEX %s", *node.Indexname))
+	}
+	result := strings.Join(out, " ")
+	return &result, nil
 }
 
 func deparse_rangevar(node pq.RangeVar) (*string, error) {
