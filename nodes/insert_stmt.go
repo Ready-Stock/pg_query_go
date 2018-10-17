@@ -13,6 +13,7 @@ import "encoding/json"
  * ----------------------
  */
 type InsertStmt struct {
+	Stmt
 	Relation         *RangeVar         `json:"relation"`         /* relation to insert into */
 	Cols             List              `json:"cols"`             /* optional: names of the target columns */
 	SelectStmt       Node              `json:"selectStmt"`       /* the source SELECT/VALUES, or NULL */
@@ -21,6 +22,16 @@ type InsertStmt struct {
 	WithClause       *WithClause       `json:"withClause"`       /* WITH clause */
 	Override         OverridingKind    `json:"override"`         /* OVERRIDING clause */
 }
+
+func (node InsertStmt) StatementType() StmtType {
+	if node.ReturningList.Items != nil && len(node.ReturningList.Items) > 0 {
+		return Rows
+	} else {
+		return RowsAffected
+	}
+}
+
+func (node InsertStmt) StatementTag() string { return "INSERT" }
 
 func (node InsertStmt) MarshalJSON() ([]byte, error) {
 	type InsertStmtMarshalAlias InsertStmt
