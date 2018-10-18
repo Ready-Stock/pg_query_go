@@ -6,7 +6,6 @@ build:
 	go build
 
 test: build
-	go get github.com/kataras/golog
 	go get github.com/kr/pretty
 	go test -v ./ ./nodes
 
