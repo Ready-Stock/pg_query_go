@@ -1,9 +1,11 @@
 package pg_query
 
 import (
+	"encoding/json"
 	"fmt"
 	pq "github.com/Ready-Stock/pg_query_go/nodes"
 	"github.com/kataras/go-errors"
+	"github.com/kataras/golog"
 	"reflect"
 	"strconv"
 	"strings"
@@ -35,7 +37,13 @@ var (
 )
 
 func Deparse(node pq.Node) (*string, error) {
-	return deparse_item(node, nil)
+	if sql, err := deparse_item(node, nil); err != nil {
+		j, _ := json.Marshal(node)
+		golog.Debugf("JSON: %s", string(j))
+		return nil, err
+	} else {
+		return sql, nil
+	}
 }
 
 func DeparseValue(aconst pq.A_Const) (interface{}, error) {
@@ -59,6 +67,8 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 			return deparse_aexpr(node, ctx)
 		case pq.AEXPR_IN:
 			return deparse_aexpr_in(node)
+		case pq.AEXPR_OP_ANY:
+			return deparse_aexpr_any(node)
 		default:
 			return nil, nil
 		}
@@ -90,6 +100,8 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_constraint(node)
 	case pq.CreateStmt:
 		return deparse_create_table(node)
+	case pq.FuncCall:
+		return deparse_funccall(node)
 	case pq.InsertStmt:
 		return deparse_insert_into(node)
 	case pq.JoinExpr:
@@ -236,6 +248,28 @@ func deparse_aexpr_in(node pq.A_Expr) (*string, error) {
 			result := fmt.Sprintf("%s %s (%s)", *str, operator, strings.Join(out, ", "))
 			return &result, nil
 		}
+	}
+}
+
+func deparse_aexpr_any(node pq.A_Expr) (*string, error) {
+	out := make([]string, 0)
+	if str, err := deparse_item(node.Lexpr, nil); err != nil {
+		return nil, err
+	} else {
+		out = append(out, *str)
+	}
+
+	if str, err := deparse_item(node.Rexpr, nil); err != nil {
+		return nil, err
+	} else {
+		out = append(out, fmt.Sprintf("ANY(%s)", *str))
+	}
+
+	if str, err := deparse_item(node.Name.Items[0], &_Operator); err != nil {
+		return nil, err
+	} else {
+		result := strings.Join(out, *str)
+		return &result, nil
 	}
 }
 
@@ -390,6 +424,10 @@ func deparse_columndef(node pq.ColumnDef) (*string, error) {
 	}
 	result := strings.Join(out, " ")
 	return &result, nil
+}
+
+func deparse_funccall(node pq.FuncCall) (*string, error) {
+	return nil, nil
 }
 
 func deparse_constraint(node pq.Constraint) (*string, error) {
