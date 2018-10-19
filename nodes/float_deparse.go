@@ -3,5 +3,5 @@
 package pg_query
 
 func (node Float) Deparse(ctx Context) (*string, error) {
-	panic("Not Implemented")
+	return &node.Str, nil
 }

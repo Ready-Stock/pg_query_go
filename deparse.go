@@ -63,8 +63,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_variable_set_stmt(node)
 	case pq.VariableShowStmt:
 		return deparse_variable_show_stmt(node)
-	case pq.Float:
-		return &node.Str, nil
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
