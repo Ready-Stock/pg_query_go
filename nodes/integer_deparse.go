@@ -2,6 +2,11 @@
 
 package pg_query
 
+import (
+	"strconv"
+)
+
 func (node Integer) Deparse(ctx Context) (*string, error) {
-	panic("Not Implemented")
+	result := strconv.FormatInt(node.Ival, 10)
+	return &result, nil
 }

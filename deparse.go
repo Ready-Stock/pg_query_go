@@ -7,7 +7,6 @@ import (
 	"github.com/kataras/go-errors"
 	"github.com/kataras/golog"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
@@ -64,9 +63,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_variable_set_stmt(node)
 	case pq.VariableShowStmt:
 		return deparse_variable_show_stmt(node)
-	case pq.Integer:
-		result := strconv.FormatInt(node.Ival, 10)
-		return &result, nil
 	case pq.Float:
 		return &node.Str, nil
 	default:
