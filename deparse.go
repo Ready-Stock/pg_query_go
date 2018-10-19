@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.InsertStmt:
-		return deparse_insert_into(node)
 	case pq.JoinExpr:
 		return deparse_joinexpr(node)
 	case pq.NullTest:
@@ -133,61 +131,6 @@ func deparse_rangevar(node pq.RangeVar) (*string, error) {
 		} else {
 			out = append(out, *str)
 		}
-	}
-
-	result := strings.Join(out, " ")
-	return &result, nil
-}
-
-func deparse_insert_into(node pq.InsertStmt) (*string, error) {
-	out := make([]string, 0)
-	if node.WithClause != nil {
-		if str, err := deparse_item(node.WithClause, nil); err != nil {
-			return nil, err
-		} else {
-			out = append(out, *str)
-		}
-	}
-
-	if node.Relation == nil {
-		return nil, errors.New("relation in insert cannot be null!")
-	}
-	out = append(out, "INSERT INTO")
-	if str, err := deparse_item(*node.Relation, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, *str)
-	}
-
-	if node.Cols.Items != nil {
-		cols := make([]string, len(node.Cols.Items))
-		for i, col := range node.Cols.Items {
-			if str, err := deparse_item(col, nil); err != nil {
-				return nil, err
-			} else {
-				cols[i] = *str
-			}
-		}
-		out = append(out, fmt.Sprintf("(%s)", strings.Join(cols, ",")))
-	}
-
-	if str, err := deparse_item(node.SelectStmt, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, *str)
-	}
-
-	if node.ReturningList.Items != nil && len(node.ReturningList.Items) > 0 {
-		out = append(out, "RETURNING")
-		fields := make([]string, len(node.ReturningList.Items))
-		for i, field := range node.ReturningList.Items {
-			if str, err := deparse_item(field, &_Select); err != nil {
-				return nil, err
-			} else {
-				fields[i] = *str
-			}
-		}
-		out = append(out, strings.Join(fields, ", "))
 	}
 
 	result := strings.Join(out, " ")
