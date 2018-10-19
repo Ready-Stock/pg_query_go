@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.ColumnDef:
-		return deparse_columndef(node)
 	case pq.Constraint:
 		return deparse_constraint(node)
 	case pq.CreateStmt:
@@ -119,39 +117,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
-}
-
-func deparse_columndef(node pq.ColumnDef) (*string, error) {
-	out := []string{*node.Colname}
-
-	if str, err := deparse_item(*node.TypeName, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, *str)
-	}
-
-	if node.RawDefault != nil {
-		out = append(out, "USING")
-		if str, err := deparse_item(node.RawDefault, nil); err != nil {
-			return nil, err
-		} else {
-			out = append(out, *str)
-		}
-	}
-
-	if node.Constraints.Items != nil && len(node.Constraints.Items) > 0 {
-		constraints := make([]string, len(node.Constraints.Items))
-		for i, constraint := range node.Constraints.Items {
-			if str, err := deparse_item(constraint, nil); err != nil {
-				return nil, err
-			} else {
-				constraints[i] = *str
-			}
-		}
-		out = append(out, constraints...)
-	}
-	result := strings.Join(out, " ")
-	return &result, nil
 }
 
 func deparse_constraint(node pq.Constraint) (*string, error) {
