@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.ColumnRef:
-		return deparse_columnref(node)
 	case pq.ColumnDef:
 		return deparse_columndef(node)
 	case pq.Constraint:
@@ -121,27 +119,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
-}
-
-func deparse_columnref(node pq.ColumnRef) (*string, error) {
-	if node.Fields.Items == nil || len(node.Fields.Items) == 0 {
-		return nil, errors.New("columnref cannot have no fields")
-	}
-	out := make([]string, len(node.Fields.Items))
-	for i, field := range node.Fields.Items {
-		switch f := field.(type) {
-		case pq.String:
-			out[i] = fmt.Sprintf(`"%s"`, f.Str)
-		default:
-			if str, err := deparse_item(field, nil); err != nil {
-				return nil, err
-			} else {
-				out[i] = *str
-			}
-		}
-	}
-	result := strings.Join(out, ".")
-	return &result, nil
 }
 
 func deparse_columndef(node pq.ColumnDef) (*string, error) {
