@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.WithClause:
-		return deparse_with_clause(node)
 	case pq.TypeCast:
 		return deparse_typecast(node)
 	case pq.TypeName:
@@ -101,29 +99,6 @@ func deparse_sqlvaluefunction(node pq.SQLValueFunction) (*string, error) {
 		return &result, nil
 	}
 	return nil, nil
-}
-
-func deparse_with_clause(node pq.WithClause) (*string, error) {
-	out := []string{"WITH"}
-	if node.Recursive {
-		out = append(out, "RECURSIVE")
-	}
-
-	if node.Ctes.Items == nil || len(node.Ctes.Items) == 0 {
-		return nil, errors.New("cannot have with clause without ctes")
-	}
-
-	ctes := make([]string, len(node.Ctes.Items))
-	for i, cte := range node.Ctes.Items {
-		if str, err := deparse_item(cte, nil); err != nil {
-			return nil, err
-		} else {
-			ctes[i] = *str
-		}
-	}
-	out = append(out, strings.Join(ctes, ", "))
-	result := strings.Join(out, " ")
-	return &result, nil
 }
 
 func deparse_item_list(nodes []pq.Node, ctx *contextType) ([]string, error) {
