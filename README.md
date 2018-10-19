@@ -184,7 +184,6 @@ Benchmark numbers from running on a 3.2 GHz Intel Core i5 CPU, OSX 10.11.
 ## Authors
 
 - [Lukas Fittl](mailto:lukas@fittl.com)
-- [Elliot Courant](mailto:elliot.courant@readystock.io)
 
 ## License
 
