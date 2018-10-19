@@ -2,10 +2,6 @@ tmp/*
 
 *.o
 *.a
-.idea/misc.xml
-.idea/modules.xml
-.idea/pg_query_go.iml
-.idea/vcs.xml
-.idea/workspace.xml
+.idea/**
 parser/.DS_Store
 .DS_Store

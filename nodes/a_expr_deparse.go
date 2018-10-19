@@ -3,5 +3,5 @@
 package pg_query
 
 func (node A_Expr) Deparse() (*string, error) {
-	panic("Not Implemented")
+	
 }
