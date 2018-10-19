@@ -26,14 +26,10 @@ const (
 
 var (
 	Star       = "*"
-	_True      = True
-	_False     = False
 	_Select    = Select
 	_Update    = Update
-	_A_CONST   = A_CONST
-	_FUNC_CALL = FUNC_CALL
 	_TYPE_NAME = TYPE_NAME
-	_Operator  = Operator
+	_A_CONST   = A_CONST
 )
 
 func Deparse(node pq.Node) (*string, error) {
@@ -61,19 +57,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.A_Expr:
-		switch node.Kind {
-		case pq.AEXPR_OP:
-			return deparse_aexpr(node, ctx)
-		case pq.AEXPR_IN:
-			return deparse_aexpr_in(node)
-		case pq.AEXPR_OP_ANY:
-			return deparse_aexpr_any(node)
-		default:
-			return nil, nil
-		}
-	case pq.Alias:
-		return deparse_alias(node)
 	case pq.A_Const:
 		return deparse_a_const(node)
 	case pq.A_Star:
@@ -100,8 +83,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_constraint(node)
 	case pq.CreateStmt:
 		return deparse_create_table(node)
-	case pq.FuncCall:
-		return deparse_funccall(node)
 	case pq.InsertStmt:
 		return deparse_insert_into(node)
 	case pq.JoinExpr:
@@ -158,20 +139,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return &result, nil
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
-	}
-}
-
-func deparse_alias(node pq.Alias) (*string, error) {
-	if node.Colnames.Items != nil && len(node.Colnames.Items) > 0 {
-		if colnames, err := deparse_item_list(node.Colnames.Items, nil); err != nil {
-			return nil, err
-		} else {
-			cols := strings.Join(colnames, ", ")
-			result := fmt.Sprintf(`%s (%s)`, *node.Aliasname, cols)
-			return &result, nil
-		}
-	} else {
-		return node.Aliasname, nil
 	}
 }
 
@@ -312,10 +279,6 @@ func deparse_columndef(node pq.ColumnDef) (*string, error) {
 	}
 	result := strings.Join(out, " ")
 	return &result, nil
-}
-
-func deparse_funccall(node pq.FuncCall) (*string, error) {
-	return nil, nil
 }
 
 func deparse_constraint(node pq.Constraint) (*string, error) {
@@ -900,7 +863,7 @@ func deparse_create_table(node pq.CreateStmt) (*string, error) {
 	return &result, nil
 }
 
-func relpersistence(relation pq.RangeVar) (*string) {
+func relpersistence(relation pq.RangeVar) *string {
 	t, u := "TEMPORARY", "UNLOGGED"
 
 	if string(relation.Relpersistence) == "t" {
