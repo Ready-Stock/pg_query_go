@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node TableLikeClause) Deparse() string {
+func (node TableLikeClause) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

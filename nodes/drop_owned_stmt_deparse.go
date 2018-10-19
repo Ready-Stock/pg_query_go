@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node DropOwnedStmt) Deparse() string {
+func (node DropOwnedStmt) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node AlternativeSubPlan) Deparse() string {
+func (node AlternativeSubPlan) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node CoerceToDomain) Deparse() string {
+func (node CoerceToDomain) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node RefreshMatViewStmt) Deparse() string {
+func (node RefreshMatViewStmt) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

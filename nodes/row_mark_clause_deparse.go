@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node RowMarkClause) Deparse() string {
+func (node RowMarkClause) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

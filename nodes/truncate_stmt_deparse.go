@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node TruncateStmt) Deparse() string {
+func (node TruncateStmt) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

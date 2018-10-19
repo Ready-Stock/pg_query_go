@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node WindowFunc) Deparse() string {
+func (node WindowFunc) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

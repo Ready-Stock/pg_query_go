@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node AlterDatabaseSetStmt) Deparse() string {
+func (node AlterDatabaseSetStmt) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

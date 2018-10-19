@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node AlterOperatorStmt) Deparse() string {
+func (node AlterOperatorStmt) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

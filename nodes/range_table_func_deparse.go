@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node RangeTableFunc) Deparse() string {
+func (node RangeTableFunc) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

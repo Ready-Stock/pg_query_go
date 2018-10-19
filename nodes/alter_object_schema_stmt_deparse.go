@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node AlterObjectSchemaStmt) Deparse() string {
+func (node AlterObjectSchemaStmt) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

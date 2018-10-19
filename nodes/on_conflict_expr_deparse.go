@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node OnConflictExpr) Deparse() string {
+func (node OnConflictExpr) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

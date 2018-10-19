@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node CaseExpr) Deparse() string {
+func (node CaseExpr) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node JoinExpr) Deparse() string {
+func (node JoinExpr) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

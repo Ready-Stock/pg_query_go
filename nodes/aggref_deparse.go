@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node Aggref) Deparse() string {
+func (node Aggref) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

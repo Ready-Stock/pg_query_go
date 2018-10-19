@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node CompositeTypeStmt) Deparse() string {
+func (node CompositeTypeStmt) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

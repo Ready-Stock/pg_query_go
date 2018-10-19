@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node PartitionRangeDatum) Deparse() string {
+func (node PartitionRangeDatum) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

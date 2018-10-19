@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node AccessPriv) Deparse() string {
+func (node AccessPriv) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

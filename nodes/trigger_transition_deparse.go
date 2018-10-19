@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node TriggerTransition) Deparse() string {
+func (node TriggerTransition) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

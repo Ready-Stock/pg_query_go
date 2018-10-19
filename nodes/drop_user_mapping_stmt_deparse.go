@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node DropUserMappingStmt) Deparse() string {
+func (node DropUserMappingStmt) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node SubLink) Deparse() string {
+func (node SubLink) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

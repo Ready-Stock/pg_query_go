@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node CreateTableSpaceStmt) Deparse() string {
+func (node CreateTableSpaceStmt) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

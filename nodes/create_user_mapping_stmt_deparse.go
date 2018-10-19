@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node CreateUserMappingStmt) Deparse() string {
+func (node CreateUserMappingStmt) Deparse() (*string, error) {
 	panic("Not Implemented")
 }

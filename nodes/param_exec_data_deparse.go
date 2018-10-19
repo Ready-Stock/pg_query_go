@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node ParamExecData) Deparse() string {
+func (node ParamExecData) Deparse() (*string, error) {
 	panic("Not Implemented")
 }
