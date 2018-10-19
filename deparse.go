@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.JoinExpr:
-		return deparse_joinexpr(node)
 	case pq.NullTest:
 		return deparse_nulltest(node)
 	case pq.RangeVar:
@@ -131,72 +129,6 @@ func deparse_rangevar(node pq.RangeVar) (*string, error) {
 		} else {
 			out = append(out, *str)
 		}
-	}
-
-	result := strings.Join(out, " ")
-	return &result, nil
-}
-
-func deparse_joinexpr(node pq.JoinExpr) (*string, error) {
-	out := make([]string, 0)
-
-	if node.Larg == nil {
-		return nil, errors.New("larg of join cannot be null")
-	}
-
-	if str, err := deparse_item(node.Larg, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, *str)
-	}
-
-	switch node.Jointype {
-	case pq.JOIN_INNER:
-		if node.IsNatural {
-			out = append(out, "NATURAL")
-		} else if node.Quals == nil && (node.UsingClause.Items == nil || len(node.UsingClause.Items) == 0) {
-			out = append(out, "CROSS")
-		}
-	case pq.JOIN_LEFT:
-		out = append(out, "LEFT")
-	case pq.JOIN_FULL:
-		out = append(out, "FULL")
-	case pq.JOIN_RIGHT:
-		out = append(out, "RIGHT")
-	default:
-		return nil, errors.New("cannot handle join type (%d)").Format(node.Jointype)
-	}
-	out = append(out, "JOIN")
-
-	if node.Rarg == nil {
-		return nil, errors.New("rarg of join cannot be null")
-	}
-
-	if str, err := deparse_item(node.Rarg, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, *str)
-	}
-
-	if node.Quals != nil {
-		out = append(out, "ON")
-		if str, err := deparse_item(node.Quals, nil); err != nil {
-			return nil, err
-		} else {
-			out = append(out, *str)
-		}
-	}
-
-	if node.UsingClause.Items != nil && len(node.UsingClause.Items) > 0 {
-		clauses := make([]string, len(node.UsingClause.Items))
-		for i, field := range node.UsingClause.Items {
-			if str, err := deparse_item(field, &_Select); err != nil {
-				return nil, err
-			} else {
-				clauses[i] = *str
-			}
-		}
-		out = append(out, fmt.Sprintf("USING (%s)", strings.Join(clauses, ", ")))
 	}
 
 	result := strings.Join(out, " ")
