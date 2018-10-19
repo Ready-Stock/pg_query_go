@@ -25,7 +25,6 @@ const (
 )
 
 var (
-	Star       = "*"
 	_Select    = Select
 	_Update    = Update
 	_TYPE_NAME = TYPE_NAME
@@ -57,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.A_Star:
-		return deparse_a_star()
 	case pq.BoolExpr:
 		// There is no BOOL_EXPR_NOT in go for some reason?
 		switch node.Boolop {
@@ -138,10 +135,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
-}
-
-func deparse_a_star() (*string, error) {
-	return &Star, nil
 }
 
 func deparse_bool_expr_and(node pq.BoolExpr) (*string, error) {
