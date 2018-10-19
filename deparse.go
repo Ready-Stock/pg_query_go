@@ -1,11 +1,9 @@
 package pg_query
 
 import (
-	"encoding/json"
 	"fmt"
 	pq "github.com/Ready-Stock/pg_query_go/nodes"
 	"github.com/kataras/go-errors"
-	"github.com/kataras/golog"
 	"reflect"
 	"strings"
 )
@@ -22,23 +20,6 @@ const (
 	TYPE_NAME contextType = 64
 	Operator  contextType = 128
 )
-
-var (
-	_Select    = Select
-	_Update    = Update
-	_TYPE_NAME = TYPE_NAME
-	_A_CONST   = A_CONST
-)
-
-func Deparse(node pq.Node) (*string, error) {
-	if sql, err := deparse_item(node, nil); err != nil {
-		j, _ := json.Marshal(node)
-		golog.Debugf("JSON: %s", string(j))
-		return nil, err
-	} else {
-		return sql, nil
-	}
-}
 
 func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 	switch c := aconst.Val.(type) {
