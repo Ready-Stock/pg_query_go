@@ -1,6 +1,6 @@
 # pg_query_go [![Build Status](https://travis-ci.org/Ready-Stock/pg_query_go.svg?branch=master)](https://travis-ci.org/Ready-Stock/pg_query_go) [![buddy pipeline](https://app.buddy.works/readystock/pg-query-go/pipelines/pipeline/147758/badge.svg?token=9de2b71b2e1600c44ff3a35f0789321517d17cc85ba22723cf6768b782d1c7e1 "buddy pipeline")](https://app.buddy.works/readystock/pg-query-go/pipelines/pipeline/147758) [![GoDoc](https://godoc.org/github.com/lfittl/pg_query_go?status.svg)](https://godoc.org/github.com/lfittl/pg_query_go)
 
-Go version of https://github.com/lfittl/pg_query
+Fork from https://github.com/lfittl/pg_query_go
 
 This Go library and its cgo extension use the actual PostgreSQL server source to parse SQL queries and return the internal PostgreSQL parse tree.
 
@@ -12,7 +12,7 @@ You can find further background to why a query's parse tree is useful here: http
 ## Installation
 
 ```
-go get github.com/lfittl/pg_query_go
+go get github.com/Ready-Stock/pg_query_go
 ```
 
 Due to compiling parts of PostgreSQL, the first time you build against this library it will take a bit longer.
@@ -31,7 +31,7 @@ package main
 
 import (
   "fmt"
-  "github.com/lfittl/pg_query_go"
+  "github.com/Ready-Stock/pg_query_go"
 )
 
 func main() {
@@ -60,8 +60,8 @@ package main
 import (
   "fmt"
   "reflect"
-  "github.com/lfittl/pg_query_go"
-  nodes "github.com/lfittl/pg_query_go/nodes"
+  "github.com/Ready-Stock/pg_query_go"
+  nodes "github.com/Ready-Stock/pg_query_go/nodes"
 )
 
 func main() {
@@ -103,7 +103,7 @@ package main
 
 import (
   "fmt"
-  "github.com/lfittl/pg_query_go"
+  "github.com/Ready-Stock/pg_query_go"
 )
 
 func main() {
@@ -184,11 +184,11 @@ Benchmark numbers from running on a 3.2 GHz Intel Core i5 CPU, OSX 10.11.
 ## Authors
 
 - [Lukas Fittl](mailto:lukas@fittl.com)
-
+- [Elliot Courant](mailto:elliot.courant@readystock.io)
 
 ## License
 
-Copyright (c) 2015, Lukas Fittl <lukas@fittl.com><br>
+Copyright (c) 2018, Lukas Fittl <lukas@fittl.com><br>
 pg_query_go is licensed under the 3-clause BSD license, see LICENSE file for details.
 
 This project includes code derived from the [PostgreSQL project](http://www.postgresql.org/),
