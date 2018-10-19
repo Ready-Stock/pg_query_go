@@ -56,16 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.BoolExpr:
-		// There is no BOOL_EXPR_NOT in go for some reason?
-		switch node.Boolop {
-		case pq.AND_EXPR:
-			return deparse_bool_expr_and(node)
-		case pq.OR_EXPR:
-			return deparse_bool_expr_or(node)
-		default:
-			return nil, errors.New("cannot handle bool expression type (%d)").Format(node.Boolop)
-		}
 	case pq.CaseExpr:
 		return deparse_case(node)
 	case pq.CaseWhen:
@@ -135,48 +125,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
-}
-
-func deparse_bool_expr_and(node pq.BoolExpr) (*string, error) {
-	if node.Args.Items == nil || len(node.Args.Items) == 0 {
-		return nil, errors.New("args cannot be empty for boolean expression")
-	}
-	args := make([]string, len(node.Args.Items))
-	for i, arg := range node.Args.Items {
-		if str, err := deparse_item(arg, nil); err != nil {
-			return nil, err
-		} else {
-			t := reflect.TypeOf(arg)
-			if t == reflect.TypeOf(pq.BoolExpr{}) && arg.(pq.BoolExpr).Boolop == pq.OR_EXPR {
-				args[i] = fmt.Sprintf("(%s)", *str)
-			} else {
-				args[i] = *str
-			}
-		}
-	}
-	result := strings.Join(args, " AND ")
-	return &result, nil
-}
-
-func deparse_bool_expr_or(node pq.BoolExpr) (*string, error) {
-	if node.Args.Items == nil || len(node.Args.Items) == 0 {
-		return nil, errors.New("args cannot be empty for boolean expression")
-	}
-	args := make([]string, len(node.Args.Items))
-	for i, arg := range node.Args.Items {
-		if str, err := deparse_item(arg, nil); err != nil {
-			return nil, err
-		} else {
-			t := reflect.TypeOf(arg)
-			if t == reflect.TypeOf(pq.BoolExpr{}) && (arg.(pq.BoolExpr).Boolop == pq.OR_EXPR || arg.(pq.BoolExpr).Boolop == pq.AND_EXPR) {
-				args[i] = fmt.Sprintf("(%s)", *str)
-			} else {
-				args[i] = *str
-			}
-		}
-	}
-	result := strings.Join(args, " OR ")
-	return &result, nil
 }
 
 func deparse_case(node pq.CaseExpr) (*string, error) {
