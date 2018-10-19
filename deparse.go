@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.CaseWhen:
-		return deparse_when(node)
 	case pq.ColumnRef:
 		return deparse_columnref(node)
 	case pq.ColumnDef:
@@ -770,27 +768,6 @@ func relpersistence(relation pq.RangeVar) *string {
 		return &u
 	}
 	return nil
-}
-
-func deparse_when(node pq.CaseWhen) (*string, error) {
-	out := []string{"WHEN"}
-
-	if str, err := deparse_item(node.Expr, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, *str)
-	}
-
-	out = append(out, "THEN")
-
-	if str, err := deparse_item(node.Result, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, *str)
-	}
-
-	result := strings.Join(out, " ")
-	return &result, nil
 }
 
 var transactionCmds = map[pq.TransactionStmtKind]string{
