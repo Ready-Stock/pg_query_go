@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.UpdateStmt:
-		return deparse_update(node)
 	case pq.WithClause:
 		return deparse_with_clause(node)
 	case pq.TypeCast:
@@ -94,70 +92,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
-}
-
-func deparse_update(node pq.UpdateStmt) (*string, error) {
-	out := make([]string, 0)
-
-	if node.WithClause != nil {
-		if str, err := deparse_item(node.WithClause, nil); err != nil {
-			return nil, err
-		} else {
-			out = append(out, *str)
-		}
-	}
-
-	out = append(out, "UPDATE")
-
-	if node.Relation == nil {
-		return nil, errors.New("relation of update statement cannot be null")
-	}
-
-	if str, err := deparse_item(*node.Relation, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, *str)
-	}
-
-	if node.TargetList.Items == nil || len(node.TargetList.Items) == 0 {
-		return nil, errors.New("update statement cannot have no sets")
-	}
-
-	if node.TargetList.Items != nil && len(node.TargetList.Items) > 0 {
-		out = append(out, "SET")
-		for _, target := range node.TargetList.Items {
-			if str, err := deparse_item(target, &_Update); err != nil {
-				return nil, err
-			} else {
-				out = append(out, *str)
-			}
-		}
-	}
-
-	if node.WhereClause != nil {
-		out = append(out, "WHERE")
-		if str, err := deparse_item(node.WhereClause, nil); err != nil {
-			return nil, err
-		} else {
-			out = append(out, *str)
-		}
-	}
-
-	if node.ReturningList.Items != nil && len(node.ReturningList.Items) > 0 {
-		out = append(out, "RETURNING")
-		returning := make([]string, len(node.ReturningList.Items))
-		for i, slct := range node.ReturningList.Items {
-			if str, err := deparse_item(slct, &_Select); err != nil {
-				return nil, err
-			} else {
-				returning[i] = *str
-			}
-		}
-		out = append(out, strings.Join(returning, ", "))
-	}
-
-	result := strings.Join(out, " ")
-	return &result, nil
 }
 
 func deparse_sqlvaluefunction(node pq.SQLValueFunction) (*string, error) {
