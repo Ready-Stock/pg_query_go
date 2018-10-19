@@ -38,8 +38,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
 	case pq.TransactionStmt:
 		return deparse_transaction(node)
-	case pq.VariableSetStmt:
-		return deparse_variable_set_stmt(node)
 	case pq.VariableShowStmt:
 		return deparse_variable_show_stmt(node)
 	default:
@@ -92,22 +90,6 @@ func deparse_transaction(node pq.TransactionStmt) (*string, error) {
 		}
 	}
 
-	result := strings.Join(out, " ")
-	return &result, nil
-}
-
-func deparse_variable_set_stmt(node pq.VariableSetStmt) (*string, error) {
-	out := []string{"SET"}
-	if node.IsLocal {
-		out = append(out, "LOCAL")
-	}
-	out = append(out, *node.Name)
-	out = append(out, "TO")
-	if args, err := deparse_item_list(node.Args.Items, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, args...)
-	}
 	result := strings.Join(out, " ")
 	return &result, nil
 }
