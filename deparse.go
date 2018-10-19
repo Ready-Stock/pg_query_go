@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.CaseExpr:
-		return deparse_case(node)
 	case pq.CaseWhen:
 		return deparse_when(node)
 	case pq.ColumnRef:
@@ -125,41 +123,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
-}
-
-func deparse_case(node pq.CaseExpr) (*string, error) {
-	out := []string{"CASE"}
-
-	if node.Arg != nil {
-		if str, err := deparse_item(node.Arg, nil); err != nil {
-			return nil, err
-		} else {
-			out = append(out, *str)
-		}
-	}
-
-	if node.Args.Items == nil || len(node.Args.Items) == 0 {
-		return nil, errors.New("case expression cannot have no arguments")
-	}
-
-	if args, err := deparse_item_list(node.Args.Items, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, args...)
-	}
-
-	if node.Defresult != nil {
-		out = append(out, "ELSE")
-		if str, err := deparse_item(node.Defresult, nil); err != nil {
-			return nil, err
-		} else {
-			out = append(out, *str)
-		}
-	}
-
-	out = append(out, "END")
-	result := strings.Join(out, " ")
-	return &result, nil
 }
 
 func deparse_columnref(node pq.ColumnRef) (*string, error) {
