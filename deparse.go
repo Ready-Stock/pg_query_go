@@ -56,13 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.RawStmt:
-		if result, err := Deparse(node.Stmt); err != nil {
-			return nil, err
-		} else {
-			result := fmt.Sprintf("%s;", *result)
-			return &result, nil
-		}
 	case pq.ResTarget:
 		return deparse_restarget(node, ctx)
 	case pq.SelectStmt:
