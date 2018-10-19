@@ -64,17 +64,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return deparse_variable_set_stmt(node)
 	case pq.VariableShowStmt:
 		return deparse_variable_show_stmt(node)
-	case pq.String:
-		switch *ctx {
-		case A_CONST:
-			result := fmt.Sprintf("'%s'", strings.Replace(node.Str, "'", "''", -1))
-			return &result, nil
-		case FUNC_CALL, TYPE_NAME, Operator:
-			return &node.Str, nil
-		default:
-			result := fmt.Sprintf(`"%s"`, strings.Replace(node.Str, `"`, `""`, -1))
-			return &result, nil
-		}
 	case pq.Integer:
 		result := strconv.FormatInt(node.Ival, 10)
 		return &result, nil
