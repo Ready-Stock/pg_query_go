@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.ResTarget:
-		return deparse_restarget(node, ctx)
 	case pq.SelectStmt:
 		return deparse_select(node)
 	case pq.UpdateStmt:
@@ -335,47 +333,6 @@ func deparse_with_clause(node pq.WithClause) (*string, error) {
 	out = append(out, strings.Join(ctes, ", "))
 	result := strings.Join(out, " ")
 	return &result, nil
-}
-
-func deparse_restarget(node pq.ResTarget, ctx *contextType) (*string, error) {
-	if ctx == nil {
-		return node.Name, nil
-	} else if *ctx == Select {
-		out := make([]string, 0)
-		if str, err := deparse_item(node.Val, nil); err != nil {
-			return nil, err
-		} else {
-			out = append(out, *str)
-		}
-
-		if node.Name != nil && len(*node.Name) > 0 {
-			out = append(out, "AS")
-			out = append(out, *node.Name)
-		}
-		result := strings.Join(out, " ")
-		return &result, nil
-	} else if *ctx == Update {
-		out := make([]string, 0)
-		if node.Name == nil || len(*node.Name) == 0 {
-			return nil, errors.New("cannot have blank name for res target in update")
-		}
-		out = append(out, *node.Name)
-
-		if node.Val == nil {
-			return nil, errors.New("cannot have null value for res target in update")
-		}
-
-		if str, err := deparse_item(node.Val, nil); err != nil {
-			return nil, err
-		} else {
-			out = append(out, *str)
-		}
-
-		result := strings.Join(out, " = ")
-		return &result, nil
-	} else {
-		return nil, nil
-	}
 }
 
 func deparse_item_list(nodes []pq.Node, ctx *contextType) ([]string, error) {
