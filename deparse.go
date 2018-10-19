@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.NullTest:
-		return deparse_nulltest(node)
 	case pq.RangeVar:
 		return deparse_rangevar(node)
 	case pq.RawStmt:
@@ -129,31 +127,6 @@ func deparse_rangevar(node pq.RangeVar) (*string, error) {
 		} else {
 			out = append(out, *str)
 		}
-	}
-
-	result := strings.Join(out, " ")
-	return &result, nil
-}
-
-func deparse_nulltest(node pq.NullTest) (*string, error) {
-	out := make([]string, 0)
-	if node.Arg == nil {
-		return nil, errors.New("argument cannot be null for null test (ironically)")
-	}
-
-	if str, err := deparse_item(node.Arg, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, *str)
-	}
-
-	switch node.Nulltesttype {
-	case pq.IS_NULL:
-		out = append(out, "IS NULL")
-	case pq.IS_NOT_NULL:
-		out = append(out, "IS NOT NULL")
-	default:
-		return nil, errors.New("could not parse null test type (%d)").Format(node.Nulltesttype)
 	}
 
 	result := strings.Join(out, " ")
