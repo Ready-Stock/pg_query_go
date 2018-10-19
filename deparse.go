@@ -57,8 +57,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.A_Const:
-		return deparse_a_const(node)
 	case pq.A_Star:
 		return deparse_a_star()
 	case pq.BoolExpr:
@@ -140,10 +138,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
-}
-
-func deparse_a_const(node pq.A_Const) (*string, error) {
-	return deparse_item(node.Val, &_A_CONST)
 }
 
 func deparse_a_star() (*string, error) {

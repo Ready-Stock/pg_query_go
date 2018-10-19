@@ -3,5 +3,5 @@
 package pg_query
 
 func (node A_Const) Deparse(ctx Context) (*string, error) {
-	panic("Not Implemented")
+	return deparseNode(node.Val, Context_AConst)
 }
