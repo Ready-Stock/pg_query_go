@@ -69,9 +69,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 		return &result, nil
 	case pq.Float:
 		return &node.Str, nil
-	case pq.Null:
-		result := "NULL"
-		return &result, nil
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}

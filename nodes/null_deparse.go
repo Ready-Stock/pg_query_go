@@ -3,5 +3,6 @@
 package pg_query
 
 func (node Null) Deparse(ctx Context) (*string, error) {
-	panic("Not Implemented")
+	result := "NULL"
+	return &result, nil
 }
