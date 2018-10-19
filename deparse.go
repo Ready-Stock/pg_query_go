@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.RangeVar:
-		return deparse_rangevar(node)
 	case pq.RawStmt:
 		if result, err := Deparse(node.Stmt); err != nil {
 			return nil, err
@@ -107,30 +105,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
-}
-
-func deparse_rangevar(node pq.RangeVar) (*string, error) {
-	out := make([]string, 0)
-	if !node.Inh {
-		out = append(out, "ONLY")
-	}
-
-	if node.Schemaname != nil && len(*node.Schemaname) > 0 {
-		out = append(out, fmt.Sprintf(`"%s"."%s"`, *node.Schemaname, *node.Relname))
-	} else {
-		out = append(out, fmt.Sprintf(`"%s"`, *node.Relname))
-	}
-
-	if node.Alias != nil {
-		if str, err := deparse_item(*node.Alias, nil); err != nil {
-			return nil, err
-		} else {
-			out = append(out, *str)
-		}
-	}
-
-	result := strings.Join(out, " ")
-	return &result, nil
 }
 
 func deparse_select(node pq.SelectStmt) (*string, error) {
