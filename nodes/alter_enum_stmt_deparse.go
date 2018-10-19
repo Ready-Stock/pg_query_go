@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node AlterEnumStmt) Deparse() (*string, error) {
+func (node AlterEnumStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node CreateForeignServerStmt) Deparse() (*string, error) {
+func (node CreateForeignServerStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

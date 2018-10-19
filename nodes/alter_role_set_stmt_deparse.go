@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node AlterRoleSetStmt) Deparse() (*string, error) {
+func (node AlterRoleSetStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node CreateForeignTableStmt) Deparse() (*string, error) {
+func (node CreateForeignTableStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

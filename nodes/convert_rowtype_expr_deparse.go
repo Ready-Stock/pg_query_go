@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node ConvertRowtypeExpr) Deparse() (*string, error) {
+func (node ConvertRowtypeExpr) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

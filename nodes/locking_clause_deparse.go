@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node LockingClause) Deparse() (*string, error) {
+func (node LockingClause) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

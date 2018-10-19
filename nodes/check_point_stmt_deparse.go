@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node CheckPointStmt) Deparse() (*string, error) {
+func (node CheckPointStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

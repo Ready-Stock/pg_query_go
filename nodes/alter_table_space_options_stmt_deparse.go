@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node AlterTableSpaceOptionsStmt) Deparse() (*string, error) {
+func (node AlterTableSpaceOptionsStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

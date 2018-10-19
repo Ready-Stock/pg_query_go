@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pg_query;
+
+enum Context {
+    None = 0;
+    True = 1;
+    False = 2;
+    Select = 4;
+    Update = 8;
+    AConst = 16;
+    FuncCall = 32;
+    TypeName = 64;
+    Operator = 128;
+}

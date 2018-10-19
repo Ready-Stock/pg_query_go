@@ -1,13 +1,17 @@
-.PHONY: default build test benchmark update_source clean
+.PHONY: default build test benchmark update_source clean protos
 
 default: test
 
 build:
 	go build
 
-test: build
+test: protos
+	build
 	go get github.com/kr/pretty
 	go test -v ./ ./nodes
+
+protos:
+	protoc -I=$(PROTOS_DIRECTORY) --go_out=./nodes $(PROTOS_DIRECTORY)/context.proto
 
 benchmark:
 	go build -a
@@ -23,6 +27,7 @@ root_dir := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 LIB_TMPDIR = $(root_dir)/tmp
 LIBDIR = $(LIB_TMPDIR)/libpg_query
 LIBDIRGZ = $(TMPDIR)/libpg_query-$(LIB_PG_QUERY_TAG).tar.gz
+PROTOS_DIRECTORY = ./protos
 
 $(LIBDIR): $(LIBDIRGZ)
 	mkdir -p $(LIBDIR)

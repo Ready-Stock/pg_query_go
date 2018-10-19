@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node AlterTableMoveAllStmt) Deparse() (*string, error) {
+func (node AlterTableMoveAllStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

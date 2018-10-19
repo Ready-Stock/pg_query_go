@@ -79,6 +79,26 @@ func (p *FingerprintSubContextSlice) AddIfUnique(ctx FingerprintSubContext) {
 // ...
 
 type Node interface {
-	Deparse() (*string, error)
+	Deparse(ctx Context) (*string, error)
 	Fingerprint(FingerprintContext, Node, string)
+}
+
+func Deparse(node Node) (*string, error) {
+	return deparseNode(node, Context_None)
+}
+
+func deparseNode(node Node, ctx Context) (*string, error) {
+	return node.Deparse(ctx)
+}
+
+func deparseNodeList(nodes []Node, ctx Context) ([]string, error) {
+	out := make([]string, len(nodes))
+	for i, node := range nodes {
+		if str, err := deparseNode(node, ctx); err != nil {
+			return nil, err
+		} else {
+			out[i] = *str
+		}
+	}
+	return out, nil
 }

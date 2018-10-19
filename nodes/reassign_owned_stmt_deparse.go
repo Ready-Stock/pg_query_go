@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node ReassignOwnedStmt) Deparse() (*string, error) {
+func (node ReassignOwnedStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

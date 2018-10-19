@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node PartitionBoundSpec) Deparse() (*string, error) {
+func (node PartitionBoundSpec) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

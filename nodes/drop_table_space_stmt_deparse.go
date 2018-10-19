@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node DropTableSpaceStmt) Deparse() (*string, error) {
+func (node DropTableSpaceStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

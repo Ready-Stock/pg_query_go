@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node MinMaxExpr) Deparse() (*string, error) {
+func (node MinMaxExpr) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

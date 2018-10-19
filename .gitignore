@@ -5,3 +5,4 @@ tmp/*
 .idea/**
 parser/.DS_Store
 .DS_Store
+*.pb.go

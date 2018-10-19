@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node SubLink) Deparse() (*string, error) {
+func (node SubLink) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

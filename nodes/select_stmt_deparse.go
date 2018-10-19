@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node SelectStmt) Deparse() (*string, error) {
+func (node SelectStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

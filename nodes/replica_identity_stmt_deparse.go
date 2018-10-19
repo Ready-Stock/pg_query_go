@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node ReplicaIdentityStmt) Deparse() (*string, error) {
+func (node ReplicaIdentityStmt) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

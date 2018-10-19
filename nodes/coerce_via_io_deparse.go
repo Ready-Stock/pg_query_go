@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node CoerceViaIO) Deparse() (*string, error) {
+func (node CoerceViaIO) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

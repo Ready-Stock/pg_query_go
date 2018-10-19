@@ -2,6 +2,6 @@
 
 package pg_query
 
-func (node SortGroupClause) Deparse() (*string, error) {
+func (node SortGroupClause) Deparse(ctx Context) (*string, error) {
 	panic("Not Implemented")
 }

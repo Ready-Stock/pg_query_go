@@ -5,12 +5,19 @@ os:
 
 go:
   - "1.11"
-  - "1.10.3"
-  - "1.10.2"
-  - "1.10.1"
+  - "1.10"
   - "1.9"
   - "1.8"
 
 install:
+ - go get -v -d google.golang.org/grpc
+ - go get -v -d -t github.com/golang/protobuf/...
+ - curl -L https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip -o /tmp/protoc.zip
+ - unzip /tmp/protoc.zip -d "$HOME"/protoc
+ - mkdir -p "$HOME"/src && ln -s "$HOME"/protoc "$HOME"/src/protobuf
+ - go get -u github.com/golang/protobuf/protoc-gen-go
+ - export PATH=$HOME/protoc/bin:$GOPATH/bin:$PATH
+ - make protos
+ - pwd
  - go get github.com/kataras/go-errors
  - go get github.com/kataras/golog
