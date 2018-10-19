@@ -38,8 +38,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
 	case pq.TransactionStmt:
 		return deparse_transaction(node)
-	case pq.VariableShowStmt:
-		return deparse_variable_show_stmt(node)
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
@@ -90,13 +88,6 @@ func deparse_transaction(node pq.TransactionStmt) (*string, error) {
 		}
 	}
 
-	result := strings.Join(out, " ")
-	return &result, nil
-}
-
-func deparse_variable_show_stmt(node pq.VariableShowStmt) (*string, error) {
-	out := []string{"SHOW"}
-	out = append(out, *node.Name)
 	result := strings.Join(out, " ")
 	return &result, nil
 }
