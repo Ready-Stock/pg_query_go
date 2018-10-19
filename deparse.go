@@ -38,8 +38,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
 	case pq.TransactionStmt:
 		return deparse_transaction(node)
-	case pq.SQLValueFunction:
-		return deparse_sqlvaluefunction(node)
 	case pq.VariableSetStmt:
 		return deparse_variable_set_stmt(node)
 	case pq.VariableShowStmt:
@@ -47,15 +45,6 @@ func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	default:
 		return nil, errors.New("cannot deparse node type %s").Format(reflect.TypeOf(node).String())
 	}
-}
-
-func deparse_sqlvaluefunction(node pq.SQLValueFunction) (*string, error) {
-	switch node.Op {
-	case pq.SVFOP_CURRENT_TIMESTAMP:
-		result := "CURRENT_TIMESTAMP"
-		return &result, nil
-	}
-	return nil, nil
 }
 
 func deparse_item_list(nodes []pq.Node, ctx *contextType) ([]string, error) {
