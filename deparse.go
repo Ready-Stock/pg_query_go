@@ -56,8 +56,6 @@ func DeparseValue(aconst pq.A_Const) (interface{}, error) {
 
 func deparse_item(n pq.Node, ctx *contextType) (*string, error) {
 	switch node := n.(type) {
-	case pq.CreateStmt:
-		return deparse_create_table(node)
 	case pq.InsertStmt:
 		return deparse_insert_into(node)
 	case pq.JoinExpr:
@@ -575,63 +573,6 @@ func deparse_item_list(nodes []pq.Node, ctx *contextType) ([]string, error) {
 		}
 	}
 	return out, nil
-}
-
-func deparse_create_table(node pq.CreateStmt) (*string, error) {
-	out := []string{"CREATE"}
-	persistance := relpersistence(*node.Relation)
-	if persistance != nil {
-		out = append(out, *persistance)
-	}
-
-	out = append(out, "TABLE")
-
-	if node.IfNotExists {
-		out = append(out, "IF NOT EXISTS")
-	}
-
-	if str, err := deparse_item(*node.Relation, nil); err != nil {
-		return nil, err
-	} else {
-		out = append(out, *str)
-	}
-
-	elts := make([]string, len(node.TableElts.Items))
-	for i, elt := range node.TableElts.Items {
-		if str, err := deparse_item(elt, nil); err != nil {
-			return nil, err
-		} else {
-			elts[i] = *str
-		}
-	}
-	out = append(out, fmt.Sprintf("(%s)", strings.Join(elts, ", ")))
-
-	if node.InhRelations.Items != nil && len(node.InhRelations.Items) > 0 {
-		out = append(out, "INHERITS")
-		relations := make([]string, len(node.InhRelations.Items))
-		for i, relation := range node.InhRelations.Items {
-			if str, err := deparse_item(relation, nil); err != nil {
-				return nil, err
-			} else {
-				relations[i] = *str
-			}
-		}
-		out = append(out, fmt.Sprintf("(%s)", strings.Join(relations, ", ")))
-	}
-
-	result := strings.Join(out, " ")
-	return &result, nil
-}
-
-func relpersistence(relation pq.RangeVar) *string {
-	t, u := "TEMPORARY", "UNLOGGED"
-
-	if string(relation.Relpersistence) == "t" {
-		return &t
-	} else if string(relation.Relpersistence) == "u" {
-		return &u
-	}
-	return nil
 }
 
 var transactionCmds = map[pq.TransactionStmtKind]string{
