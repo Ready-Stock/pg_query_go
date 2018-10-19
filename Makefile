@@ -5,8 +5,7 @@ default: test
 build:
 	go build
 
-test: protos
-	build
+test: protos build
 	go get github.com/kr/pretty
 	go test -v ./ ./nodes
 
