@@ -3,5 +3,6 @@
 package pg_query
 
 func (node ParamRef) Deparse(ctx Context) (*string, error) {
+
 	panic("Not Implemented")
 }

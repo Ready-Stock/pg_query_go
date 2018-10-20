@@ -23,16 +23,6 @@ type InsertStmt struct {
 	Override         OverridingKind    `json:"override"`         /* OVERRIDING clause */
 }
 
-func (node InsertStmt) StatementType() StmtType {
-	if node.ReturningList.Items != nil && len(node.ReturningList.Items) > 0 {
-		return Rows
-	} else {
-		return RowsAffected
-	}
-}
-
-func (node InsertStmt) StatementTag() string { return "INSERT" }
-
 func (node InsertStmt) MarshalJSON() ([]byte, error) {
 	type InsertStmtMarshalAlias InsertStmt
 	return json.Marshal(map[string]interface{}{

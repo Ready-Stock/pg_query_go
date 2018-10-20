@@ -27,10 +27,6 @@ var transactionCmds = map[TransactionStmtKind]string{
 	TRANS_STMT_ROLLBACK_PREPARED: "ROLLBACK TRANSACTION",
 }
 
-func (node TransactionStmt) StatementType() StmtType { return Ack }
-
-func (node TransactionStmt) StatementTag() string { return transactionCmds[node.Kind] }
-
 func (node TransactionStmt) MarshalJSON() ([]byte, error) {
 	type TransactionStmtMarshalAlias TransactionStmt
 	return json.Marshal(map[string]interface{}{

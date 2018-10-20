@@ -12,10 +12,6 @@ type VariableSetStmt struct {
 	IsLocal bool            `json:"is_local"` /* SET LOCAL? */
 }
 
-func (node VariableSetStmt) StatementType() StmtType { return Ack }
-
-func (node VariableSetStmt) StatementTag() string { return "SET" }
-
 func (node VariableSetStmt) MarshalJSON() ([]byte, error) {
 	type VariableSetStmtMarshalAlias VariableSetStmt
 	return json.Marshal(map[string]interface{}{

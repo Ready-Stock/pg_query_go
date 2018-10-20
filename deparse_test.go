@@ -245,6 +245,25 @@ func Test_Begin(t *testing.T) {
 	}
 }
 
+func Test_FunctionCall(t *testing.T) {
+	input := `select current_database() as a, current_schemas(false) as b, totalRecords() as c`
+	fmt.Printf("INPUT: %s\n", input)
+	tree, err := Parse(input)
+	if err != nil {
+		t.Error(err)
+		t.Fail()
+		return
+	}
+	json, _ := tree.MarshalJSON()
+	fmt.Println(string(json))
+	if sql, err := pq.Deparse(tree.Statements[0]); err != nil {
+		t.Error(err)
+		t.Fail()
+	} else {
+		fmt.Printf("OUTPUT: %s\n", *sql)
+	}
+}
+
 // func Test_WeirdSelect(t *testing.T) {
 // 	input := `SELECT n.nspname = ANY(current_schemas(true)), n.nspname, t.typname FROM pg_catalog.pg_type t JOIN pg_catalog.pg_namespace n ON t.typnamespace = n.oid WHERE t.oid = $1`
 // 	fmt.Printf("INPUT: %s\n", input)
