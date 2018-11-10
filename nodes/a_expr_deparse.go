@@ -20,7 +20,7 @@ func (node A_Expr) Deparse(ctx Context) (*string, error) {
 	case AEXPR_BETWEEN, AEXPR_NOT_BETWEEN, AEXPR_BETWEEN_SYM, AEXPR_NOT_BETWEEN_SYM:
 		return node.deparseAexprBetween(ctx)
 	case AEXPR_NULLIF:
-		panic("not implemented") // TODO elliotcourant Implement
+		return node.deparseAExprNullIf(ctx)
 	default:
 		return nil, errors.Errorf("could not parse AExpr of kind: %d, not implemented", node.Kind)
 	}
@@ -36,13 +36,13 @@ func (node A_Expr) deparseAexpr(ctx Context) (*string, error) {
 			if n.Items == nil || len(n.Items) == 0 {
 				return nil, errors.New("lexpr list cannot be empty")
 			}
-			if str, err := deparseNode(n.Items[0], ctx); err != nil {
+			if str, err := n.Items[0].Deparse(ctx); err != nil {
 				return nil, err
 			} else {
 				out = append(out, *str)
 			}
 		default:
-			if str, err := deparseNode(n, ctx); err != nil {
+			if str, err := n.Deparse(ctx); err != nil {
 				return nil, err
 			} else {
 				out = append(out, *str)
@@ -107,7 +107,7 @@ func (node A_Expr) deparseAexprIn(ctx Context) (*string, error) {
 			return nil, errors.New("lexpr of IN expression cannot be null")
 		}
 
-		if str, err := deparseNode(node.Lexpr, Context_None); err != nil {
+		if str, err := node.Lexpr.Deparse(Context_None); err != nil {
 			return nil, err
 		} else {
 			result := fmt.Sprintf("%s %s (%s)", *str, operator, strings.Join(out, ", "))
@@ -118,13 +118,13 @@ func (node A_Expr) deparseAexprIn(ctx Context) (*string, error) {
 
 func (node A_Expr) deparseAexprAny(ctx Context) (*string, error) {
 	out := make([]string, 0)
-	if str, err := deparseNode(node.Lexpr, Context_None); err != nil {
+	if str, err := node.Lexpr.Deparse(Context_None); err != nil {
 		return nil, err
 	} else {
 		out = append(out, *str)
 	}
 
-	if str, err := deparseNode(node.Rexpr, Context_None); err != nil {
+	if str, err := node.Rexpr.Deparse(Context_None); err != nil {
 		return nil, err
 	} else {
 		out = append(out, fmt.Sprintf("ANY(%s)", *str))
@@ -152,7 +152,7 @@ func (node A_Expr) deparseAexprBetween(ctx Context) (*string, error) {
 		between = "NOT BETWEEN SYMMETRIC"
 	}
 
-	name, err := deparseNode(node.Lexpr, ctx)
+	name, err := node.Lexpr.Deparse(Context_None)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func (node A_Expr) deparseAexprBetween(ctx Context) (*string, error) {
 	rightExpression := node.Rexpr.(List)
 	out := make([]string, len(rightExpression.Items))
 	for i, expr := range rightExpression.Items {
-		if str, err := expr.Deparse(ctx); err != nil {
+		if str, err := expr.Deparse(Context_None); err != nil {
 			return nil, err
 		} else {
 			out[i] = *str
@@ -168,5 +168,20 @@ func (node A_Expr) deparseAexprBetween(ctx Context) (*string, error) {
 	}
 
 	result := fmt.Sprintf("%s %s %s", *name, between, strings.Join(out, " AND "))
+	return &result, nil
+}
+
+func (node A_Expr) deparseAExprNullIf(ctx Context) (*string, error) {
+	leftString, err := node.Lexpr.Deparse(Context_None)
+	if err != nil {
+		return nil, err
+	}
+
+	rightString, err := node.Rexpr.Deparse(Context_None)
+	if err != nil {
+		return nil, err
+	}
+
+	result := fmt.Sprintf("NULLIF(%s, %s)", *leftString, *rightString)
 	return &result, nil
 }

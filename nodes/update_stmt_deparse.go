@@ -11,7 +11,7 @@ func (node UpdateStmt) Deparse(ctx Context) (*string, error) {
 	out := make([]string, 0)
 
 	if node.WithClause != nil {
-		if str, err := deparseNode(node.WithClause, Context_None); err != nil {
+		if str, err := node.WithClause.Deparse(Context_None); err != nil {
 			return nil, err
 		} else {
 			out = append(out, *str)
