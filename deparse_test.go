@@ -264,8 +264,27 @@ func Test_FunctionCall(t *testing.T) {
 	}
 }
 
-func Test_Between(t *testing.T) {
+func Test_DeparseBetween(t *testing.T) {
 	input := `select * from test where id between 1 and 3`
+	fmt.Printf("INPUT: %s\n", input)
+	tree, err := Parse(input)
+	if err != nil {
+		t.Error(err)
+		t.Fail()
+		return
+	}
+	json, _ := tree.MarshalJSON()
+	fmt.Println(string(json))
+	if sql, err := pq.Deparse(tree.Statements[0]); err != nil {
+		t.Error(err)
+		t.Fail()
+	} else {
+		fmt.Printf("OUTPUT: %s\n", *sql)
+	}
+}
+
+func Test_DeparseNullIf(t *testing.T) {
+	input := `select nullif(id,1) from test`
 	fmt.Printf("INPUT: %s\n", input)
 	tree, err := Parse(input)
 	if err != nil {
