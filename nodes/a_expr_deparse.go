@@ -13,10 +13,14 @@ func (node A_Expr) Deparse(ctx Context) (*string, error) {
 	switch node.Kind {
 	case AEXPR_OP:
 		return node.deparseAexpr(ctx)
-	case AEXPR_IN:
-		return node.deparseAexprIn(ctx)
 	case AEXPR_OP_ANY:
 		return node.deparseAexprAny(ctx)
+	case AEXPR_IN:
+		return node.deparseAexprIn(ctx)
+	case AEXPR_BETWEEN, AEXPR_NOT_BETWEEN, AEXPR_BETWEEN_SYM, AEXPR_NOT_BETWEEN_SYM:
+		return node.deparseAexprBetween(ctx)
+	case AEXPR_NULLIF:
+		panic("not implemented") // TODO elliotcourant Implement
 	default:
 		return nil, errors.Errorf("could not parse AExpr of kind: %d, not implemented", node.Kind)
 	}
@@ -133,4 +137,36 @@ func (node A_Expr) deparseAexprAny(ctx Context) (*string, error) {
 		result := strings.Join(out, *str)
 		return &result, nil
 	}
+}
+
+func (node A_Expr) deparseAexprBetween(ctx Context) (*string, error) {
+	between := ""
+	switch node.Kind {
+	case AEXPR_BETWEEN:
+		between = "BETWEEN"
+	case AEXPR_NOT_BETWEEN:
+		between = "NOT BETWEEN"
+	case AEXPR_BETWEEN_SYM:
+		between = "BETWEEN SYMMETRIC"
+	case AEXPR_NOT_BETWEEN_SYM:
+		between = "NOT BETWEEN SYMMETRIC"
+	}
+
+	name, err := deparseNode(node.Lexpr, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rightExpression := node.Rexpr.(List)
+	out := make([]string, len(rightExpression.Items))
+	for i, expr := range rightExpression.Items {
+		if str, err := expr.Deparse(ctx); err != nil {
+			return nil, err
+		} else {
+			out[i] = *str
+		}
+	}
+
+	result := fmt.Sprintf("%s %s %s", *name, between, strings.Join(out, " AND "))
+	return &result, nil
 }
