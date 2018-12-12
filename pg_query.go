@@ -2,7 +2,7 @@ package pg_query
 
 import (
 	"encoding/json"
-	"github.com/Ready-Stock/pg_query_go/parser"
+	"github.com/readystock/pg_query_go/parser"
 	"runtime/debug"
 )
 

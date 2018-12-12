@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Ready-Stock/pg_query_go"
-	nodes "github.com/Ready-Stock/pg_query_go/nodes"
+	"github.com/readystock/pg_query_go"
+	nodes "github.com/readystock/pg_query_go/nodes"
 )
 
 type fingerprintTest struct {

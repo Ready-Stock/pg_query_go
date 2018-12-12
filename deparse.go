@@ -1,7 +1,7 @@
 package pg_query
 
 import (
-	pq "github.com/Ready-Stock/pg_query_go/nodes"
+	pq "github.com/readystock/pg_query_go/nodes"
 	"github.com/kataras/go-errors"
 	"reflect"
 )

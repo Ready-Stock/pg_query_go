@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Ready-Stock/pg_query_go"
+	"github.com/readystock/pg_query_go"
 )
 
 var normalizeTests = []struct {

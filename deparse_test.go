@@ -2,7 +2,7 @@ package pg_query
 
 import (
 	"fmt"
-	pq "github.com/Ready-Stock/pg_query_go/nodes"
+	pq "github.com/readystock/pg_query_go/nodes"
 	"testing"
 )
 

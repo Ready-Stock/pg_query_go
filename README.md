@@ -12,7 +12,7 @@ You can find further background to why a query's parse tree is useful here: http
 ## Installation
 
 ```
-go get github.com/Ready-Stock/pg_query_go
+go get github.com/readystock/pg_query_go
 ```
 
 Due to compiling parts of PostgreSQL, the first time you build against this library it will take a bit longer.
@@ -31,7 +31,7 @@ package main
 
 import (
   "fmt"
-  "github.com/Ready-Stock/pg_query_go"
+  "github.com/readystock/pg_query_go"
 )
 
 func main() {
@@ -60,8 +60,8 @@ package main
 import (
   "fmt"
   "reflect"
-  "github.com/Ready-Stock/pg_query_go"
-  nodes "github.com/Ready-Stock/pg_query_go/nodes"
+  "github.com/readystock/pg_query_go"
+  nodes "github.com/readystock/pg_query_go/nodes"
 )
 
 func main() {
@@ -103,7 +103,7 @@ package main
 
 import (
   "fmt"
-  "github.com/Ready-Stock/pg_query_go"
+  "github.com/readystock/pg_query_go"
 )
 
 func main() {
