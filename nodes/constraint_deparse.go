@@ -69,6 +69,16 @@ func (node Constraint) Deparse(ctx Context) (*string, error) {
 			} else {
 				out = append(out, fmt.Sprintf("REFERENCES %s (%s)", *pk, strings.Join(list, ", ")))
 			}
+
+			switch node.FkDelAction {
+			case 97: // Default (NO ACTION)
+			case 99: // On Delete cascade
+				out = append(out, "ON DELETE CASCADE")
+			case 110:
+				out = append(out, "ON DELETE SET NULL")
+			case 114: // On Delete Restrict
+				out = append(out, "ON DELETE RESTRICT")
+			}
 		}
 	}
 
