@@ -3,6 +3,7 @@ package pg_query
 type Stmt interface {
 	StatementType() StmtType
 	StatementTag() string
+	Deparse(ctx Context) (*string, error)
 }
 
 func (node CreateStmt) StatementType() StmtType { return DDL }
