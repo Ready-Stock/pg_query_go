@@ -1,21 +1,25 @@
 package pg_query
 
 type Stmt interface {
-	StatementType() StmtType
-	StatementTag() string
-	Deparse(ctx Context) (*string, error)
+    StatementType() StmtType
+    StatementTag() string
+    Deparse(ctx Context) (*string, error)
 }
 
 func (node CreateStmt) StatementType() StmtType { return DDL }
 
 func (node CreateStmt) StatementTag() string { return "CREATE TABLE" }
 
+func (node DropStmt) StatementType() StmtType { return DDL }
+
+func (node DropStmt) StatementTag() string { return "DROP TABLE" }
+
 func (node InsertStmt) StatementType() StmtType {
-	if node.ReturningList.Items != nil && len(node.ReturningList.Items) > 0 {
-		return Rows
-	} else {
-		return RowsAffected
-	}
+    if node.ReturningList.Items != nil && len(node.ReturningList.Items) > 0 {
+        return Rows
+    } else {
+        return RowsAffected
+    }
 }
 
 func (node InsertStmt) StatementTag() string { return "INSERT" }
