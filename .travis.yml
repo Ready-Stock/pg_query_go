@@ -11,3 +11,5 @@ go:
 
 install:
   - make setup
+  - export PATH=$HOME/protoc/bin:$GOPATH/bin:$PATH
+  - make protos

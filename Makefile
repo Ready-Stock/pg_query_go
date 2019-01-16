@@ -17,7 +17,7 @@ setup:
 	unzip /tmp/protoc.zip -d "$HOME"/protoc
 	mkdir -p "$HOME"/src && ln -s "$HOME"/protoc "$HOME"/src/protobuf
 	go get -u github.com/golang/protobuf/protoc-gen-go
-	export PATH=$HOME/protoc/bin:$GOPATH/bin:$PATH
+
 
 test: protos enums build
 	go get github.com/juju/errors
