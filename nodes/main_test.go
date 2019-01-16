@@ -23,7 +23,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	golog.SetLevel("debug")
+	golog.SetLevel(os.Getenv("GOLOG_LEVEL"))
 	retCode := m.Run()
 	os.Exit(retCode)
 }
