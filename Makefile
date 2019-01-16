@@ -1,6 +1,6 @@
 .PHONY: default build test benchmark update_source clean protos
 
-default: setup test
+default: test
 
 enums:
 	@go get -u -a golang.org/x/tools/cmd/stringer
