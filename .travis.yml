@@ -23,3 +23,4 @@ install:
   - go get github.com/juju/errors
   - go get github.com/kataras/go-errors
   - go get github.com/kataras/golog
+  - go get github.com/readystock/golog
