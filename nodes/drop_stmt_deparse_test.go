@@ -86,3 +86,18 @@ func Test_DropStmt_Aggregate(t *testing.T) {
 		Expected: `DROP AGGREGATE public.temp(int, text)`,
 	})
 }
+
+func Test_DropStmt_Cast(t *testing.T) {
+	DoTest(t, DeparseTest{
+		Query:    `DROP CAST (text AS int);`,
+		Expected: `DROP CAST (text AS int)`,
+	})
+	DoTest(t, DeparseTest{
+		Query:    `DROP CAST (text AS integer);`,
+		Expected: `DROP CAST (text AS int)`,
+	})
+	DoTest(t, DeparseTest{
+		Query:    `DROP CAST (BOOL AS text);`,
+		Expected: `DROP CAST (bool AS text)`,
+	})
+}

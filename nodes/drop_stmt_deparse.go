@@ -37,7 +37,12 @@ func (node DropStmt) Deparse(ctx Context) (*string, error) {
 			if objs, err := list.DeparseList(Context_None); err != nil {
 				return nil, err
 			} else {
-				objects[i] = strings.Join(objs, ".")
+				switch node.RemoveType {
+				case OBJECT_CAST:
+					objects[i] = fmt.Sprintf("(%s)", strings.Join(objs, " AS "))
+				default:
+					objects[i] = strings.Join(objs, ".")
+				}
 			}
 		default:
 			if str, err := obj.Deparse(Context_None); err != nil {
