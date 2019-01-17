@@ -116,3 +116,18 @@ func Test_DropStmt_Collation(t *testing.T) {
 		Expected: `DROP COLLATION "thing"`,
 	})
 }
+
+func Test_DropStmt_Conversions(t *testing.T) {
+	DoTest(t, DeparseTest{
+		Query:    `DROP CONVERSION thing;`,
+		Expected: `DROP CONVERSION "thing"`,
+	})
+	DoTest(t, DeparseTest{
+		Query:    `DROP CONVERSION THING;`,
+		Expected: `DROP CONVERSION "thing"`,
+	})
+	DoTest(t, DeparseTest{
+		Query:    `DROP CONVERSION "thing";`,
+		Expected: `DROP CONVERSION "thing"`,
+	})
+}
