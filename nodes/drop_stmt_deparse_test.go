@@ -101,3 +101,18 @@ func Test_DropStmt_Cast(t *testing.T) {
 		Expected: `DROP CAST (bool AS text)`,
 	})
 }
+
+func Test_DropStmt_Collation(t *testing.T) {
+	DoTest(t, DeparseTest{
+		Query:    `DROP COLLATION thing;`,
+		Expected: `DROP COLLATION "thing"`,
+	})
+	DoTest(t, DeparseTest{
+		Query:    `DROP COLLATION THING;`,
+		Expected: `DROP COLLATION "thing"`,
+	})
+	DoTest(t, DeparseTest{
+		Query:    `DROP COLLATION "thing";`,
+		Expected: `DROP COLLATION "thing"`,
+	})
+}

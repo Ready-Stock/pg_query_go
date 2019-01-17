@@ -18,6 +18,8 @@ func (node DropStmt) Deparse(ctx Context) (*string, error) {
 			return "AGGREGATE"
 		case OBJECT_CAST:
 			return "CAST"
+		case OBJECT_COLLATION:
+			return "COLLATION"
 		case OBJECT_TABLE:
 			return "TABLE"
 		default:
