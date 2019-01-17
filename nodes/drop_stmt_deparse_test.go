@@ -135,14 +135,10 @@ func Test_DropStmt_Conversions(t *testing.T) {
 func Test_DropStmt_Database(t *testing.T) {
 	DoTest(t, DeparseTest{
 		Query:    `DROP DATABASE thing;`,
-		Expected: `DROP DATABASE "thing"`,
+        Expected: `DROP DATABASE thing`,
 	})
 	DoTest(t, DeparseTest{
-		Query:    `DROP DATABASE THING;`,
-		Expected: `DROP DATABASE "thing"`,
-	})
-	DoTest(t, DeparseTest{
-		Query:    `DROP DATABASE "thing";`,
-		Expected: `DROP DATABASE "thing"`,
+        Query:    `drop database thing;`,
+        Expected: `DROP DATABASE thing`,
 	})
 }
