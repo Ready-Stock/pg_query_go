@@ -14,6 +14,7 @@ var (
         OBJECT_CAST:          "CAST",
         OBJECT_COLLATION:     "COLLATION",
         OBJECT_CONVERSION:    "CONVERSION",
+        OBJECT_DATABASE:      "DATABASE",
 
         OBJECT_TABLE: "TABLE",
     }
