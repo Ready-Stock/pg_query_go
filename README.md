@@ -1,4 +1,4 @@
-# pg_query_go [![Build Status](https://travis-ci.org/readystock/pg_query_go.svg?branch=master)](https://travis-ci.org/readystock/pg_query_go) [![buddy pipeline](https://app.buddy.works/readystock/pg-query-go/pipelines/pipeline/147758/badge.svg?token=9de2b71b2e1600c44ff3a35f0789321517d17cc85ba22723cf6768b782d1c7e1 "buddy pipeline")](https://app.buddy.works/readystock/pg-query-go/pipelines/pipeline/147758) [![GoDoc](https://godoc.org/github.com/lfittl/pg_query_go?status.svg)](https://godoc.org/github.com/lfittl/pg_query_go)
+# pg_query_go [![Build Status](https://travis-ci.org/readystock/pg_query_go.svg?branch=master)](https://travis-ci.org/readystock/pg_query_go) [![buddy pipeline](https://app.buddy.works/readystock/pg-query-go/pipelines/pipeline/147758/badge.svg?token=9de2b71b2e1600c44ff3a35f0789321517d17cc85ba22723cf6768b782d1c7e1 "buddy pipeline")](https://app.buddy.works/readystock/pg-query-go/pipelines/pipeline/147758) [![CodeFactor](https://www.codefactor.io/repository/github/readystock/pg_query_go/badge)](https://www.codefactor.io/repository/github/readystock/pg_query_go)
 
 Fork from https://github.com/lfittl/pg_query_go
 
