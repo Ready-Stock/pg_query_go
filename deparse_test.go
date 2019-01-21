@@ -21,7 +21,7 @@ var (
 		},
 		{
 			"insert into users (user_id,email) values(1, 'email@email.com') RETURNING *",
-			`INSERT INTO "users" (user_id,email) VALUES (1, 'email@email.com') RETURNING *`,
+			`INSERT INTO "users" (user_id, email) VALUES (1, 'email@email.com') RETURNING *`,
 		},
 		{
 			`select t.oid,
