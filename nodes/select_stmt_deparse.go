@@ -3,6 +3,7 @@
 package pg_query
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -79,17 +80,19 @@ func (node SelectStmt) Deparse(ctx Context) (*string, error) {
 
 	if node.ValuesLists != nil && len(node.ValuesLists) > 0 {
 		out = append(out, "VALUES")
-		for _, valuelist := range node.ValuesLists {
-			values := make([]string, len(valuelist))
-			for i, value := range valuelist {
-				if str, err := deparseNode(value, Context_None); err != nil {
+		allValues := make([]string, len(node.ValuesLists))
+		for v, valueList := range node.ValuesLists {
+			values := make([]string, len(valueList))
+			for i, value := range valueList {
+				if str, err := value.Deparse(Context_None); err != nil {
 					return nil, err
 				} else {
 					values[i] = *str
 				}
 			}
-			out = append(out, "("+strings.Join(values, ", ")+")")
+			allValues[v] = fmt.Sprintf("(%s)", strings.Join(values, ", "))
 		}
+		out = append(out, strings.Join(allValues, ", "))
 	}
 
 	if node.GroupClause.Items != nil && len(node.GroupClause.Items) > 0 {

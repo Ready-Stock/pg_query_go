@@ -14,7 +14,7 @@ var (
         OBJECT_CAST:          "CAST",
         OBJECT_COLLATION:     "COLLATION",
         OBJECT_CONVERSION:    "CONVERSION",
-        OBJECT_DATABASE:      "DATABASE",
+        OBJECT_DATABASE:      "DATABASE", // technically this gets handled by dropdb_stmt.go
 
         OBJECT_TABLE: "TABLE",
     }

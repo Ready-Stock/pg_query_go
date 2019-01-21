@@ -37,10 +37,10 @@ func (node InsertStmt) Deparse(ctx Context) (*string, error) {
 				cols[i] = *str
 			}
 		}
-		out = append(out, fmt.Sprintf("(%s)", strings.Join(cols, ",")))
+		out = append(out, fmt.Sprintf("(%s)", strings.Join(cols, ", ")))
 	}
 
-	if str, err := deparseNode(node.SelectStmt, Context_None); err != nil {
+	if str, err := node.SelectStmt.Deparse(Context_None); err != nil {
 		return nil, err
 	} else {
 		out = append(out, *str)
