@@ -28,9 +28,7 @@ func (node A_Expr) Deparse(ctx Context) (*string, error) {
 
 func (node A_Expr) deparseAexpr(ctx Context) (*string, error) {
 	out := make([]string, 0)
-	if node.Lexpr == nil {
-		return nil, errors.New("lexpr of expression cannot be null")
-	} else {
+	if node.Lexpr != nil {
 		switch n := node.Lexpr.(type) {
 		case List:
 			if n.Items == nil || len(n.Items) == 0 {
@@ -50,9 +48,7 @@ func (node A_Expr) deparseAexpr(ctx Context) (*string, error) {
 		}
 	}
 
-	if node.Lexpr == nil {
-		return nil, errors.New("rexpr of expression cannot be null")
-	} else {
+	if node.Rexpr != nil {
 		if str, err := deparseNode(node.Rexpr, ctx); err != nil {
 			return nil, err
 		} else {

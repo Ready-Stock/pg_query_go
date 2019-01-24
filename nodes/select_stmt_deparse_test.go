@@ -20,12 +20,12 @@ import (
 	"testing"
 )
 
-// func Test_Select_OrderBy(t *testing.T) {
-// 	DoTest(t, DeparseTest{
-// 		Query: `SELECT id FROM users ORDER BY id DESC;`,
-// 		Expected: `SELECT "id" FROM "users" ORDER BY "id" DESC`,
-// 	})
-// }
+func Test_Select_OrderBy(t *testing.T) {
+	DoTest(t, DeparseTest{
+		Query:    `SELECT id FROM users ORDER BY id DESC;`,
+		Expected: `SELECT "id" FROM "users" ORDER BY "id" DESC`,
+	})
+}
 
 func Test_Select_WeirdBoolExpr(t *testing.T) {
 	DoTest(t, DeparseTest{
@@ -34,6 +34,6 @@ from pg_catalog.pg_database N
   left join pg_catalog.pg_shdescription D on N.oid = D.objoid
 where not datistemplate
 order by case when datname = pg_catalog.current_database() then -1::bigint else N.oid::bigint end`,
-		Expected: ``,
+		Expected: `SELECT "n"."oid"::bigint AS id, "datname" AS name, "d"."description" FROM "pg_catalog"."pg_database" n LEFT JOIN "pg_catalog"."pg_shdescription" d ON "n"."oid" = "d"."objoid" WHERE NOT datistemplate ORDER BY CASE WHEN "datname" = current_database() THEN 1::bigint ELSE "n"."oid"::bigint END`,
 	})
 }

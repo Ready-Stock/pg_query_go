@@ -118,7 +118,17 @@ func (node SelectStmt) Deparse(ctx Context) (*string, error) {
 
 	// Sort clause
 	if len(node.SortClause.Items) > 0 {
+		out = append(out, "ORDER BY")
+		sort := make([]string, len(node.SortClause.Items))
+		for i, item := range node.SortClause.Items {
+			if str, err := item.Deparse(Context_None); err != nil {
+				return nil, err
+			} else {
+				sort[i] = *str
+			}
+		}
 
+		out = append(out, strings.Join(sort, ", "))
 	}
 
 	if node.LimitCount != nil {
