@@ -16,9 +16,33 @@ func (node BoolExpr) Deparse(ctx Context) (*string, error) {
 		return node.deparseBoolExprAnd()
 	case OR_EXPR:
 		return node.deparseBoolExprOr()
+	case 2: // WHERE NOT
+		return node.deparseBoolExprNot()
 	default:
 		return nil, errors.Errorf("cannot handle bool expression type (%d)", node.Boolop)
 	}
+}
+
+func (node BoolExpr) deparseBoolExprNot() (*string, error) {
+	out := []string{"NOT"}
+
+	items := make([]string, len(node.Args.Items))
+	for i, item := range node.Args.Items {
+		if str, err := item.Deparse(Context_Operator); err != nil {
+			return nil, err
+		} else {
+			items[i] = *str
+		}
+	}
+
+	if len(items) > 1 {
+		panic("cannot handle more than 1 arg in `not` expression")
+	}
+
+	out = append(out, items...)
+
+	result := strings.Join(out, " ")
+	return &result, nil
 }
 
 func (node BoolExpr) deparseBoolExprAnd() (*string, error) {

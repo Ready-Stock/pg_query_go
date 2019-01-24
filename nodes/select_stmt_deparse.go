@@ -117,6 +117,9 @@ func (node SelectStmt) Deparse(ctx Context) (*string, error) {
 	}
 
 	// Sort clause
+	if len(node.SortClause.Items) > 0 {
+
+	}
 
 	if node.LimitCount != nil {
 		out = append(out, "LIMIT")

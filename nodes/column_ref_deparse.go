@@ -3,7 +3,6 @@
 package pg_query
 
 import (
-	"fmt"
 	"github.com/juju/errors"
 	"strings"
 )
@@ -14,15 +13,10 @@ func (node ColumnRef) Deparse(ctx Context) (*string, error) {
 	}
 	out := make([]string, len(node.Fields.Items))
 	for i, field := range node.Fields.Items {
-		switch f := field.(type) {
-		case String:
-			out[i] = fmt.Sprintf(`"%s"`, f.Str)
-		default:
-			if str, err := deparseNode(field, Context_None); err != nil {
-				return nil, err
-			} else {
-				out[i] = *str
-			}
+		if str, err := field.Deparse(ctx); err != nil {
+			return nil, err
+		} else {
+			out[i] = *str
 		}
 	}
 	result := strings.Join(out, ".")
