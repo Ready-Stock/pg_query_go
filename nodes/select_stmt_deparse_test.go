@@ -20,6 +20,13 @@ import (
 	"testing"
 )
 
+func Test_Select_Simple(t *testing.T) {
+	DoTest(t, DeparseTest{
+		Query:    `SELECT 1;`,
+		Expected: `SELECT 1`,
+	})
+}
+
 func Test_Select_OrderBy(t *testing.T) {
 	DoTest(t, DeparseTest{
 		Query:    `SELECT id FROM users ORDER BY id DESC;`,

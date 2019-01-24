@@ -141,4 +141,8 @@ func Test_DropStmt_Database(t *testing.T) {
         Query:    `drop database thing;`,
         Expected: `DROP DATABASE thing`,
 	})
+	DoTest(t, DeparseTest{
+		Query:    `drop database IF EXISTS thing;`,
+		Expected: `DROP DATABASE IF EXISTS thing`,
+	})
 }
