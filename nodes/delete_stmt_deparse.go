@@ -39,7 +39,7 @@ func (node DeleteStmt) Deparse(ctx Context) (*string, error) {
 
 	if node.WhereClause != nil {
 		out = append(out, "WHERE")
-		if str, err := deparseNode(node.WhereClause, Context_None); err != nil {
+		if str, err := node.WhereClause.Deparse(Context_None); err != nil {
 			return nil, err
 		} else {
 			out = append(out, *str)

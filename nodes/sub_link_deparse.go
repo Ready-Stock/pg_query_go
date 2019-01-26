@@ -15,6 +15,8 @@ func (node SubLink) Deparse(ctx Context) (*string, error) {
 			result := fmt.Sprintf("(%s)", *subSelect)
 			return &result, err
 		}
+	case ANY_SUBLINK:
+
 	default:
 		panic(fmt.Sprintf("cannot handle sub link type [%s]", node.SubLinkType.String()))
 	}
