@@ -69,8 +69,12 @@ func Test_DeleteStmt_WhereSelect(t *testing.T) {
 		Query:    `DELETE FROM thing WHERE thing.id = (SELECT id FROM stuff);`,
 		Expected: `DELETE FROM "thing" WHERE "thing"."id" = (SELECT "id" FROM "stuff")`,
 	})
-	// DoTest(t, DeparseTest{
-	// 	Query:    `DELETE FROM thing WHERE thing.id IN (SELECT id FROM stuff);`,
-	// 	Expected: `DELETE FROM "thing" WHERE "thing"."id" IN (SELECT "id" FROM "stuff")`,
-	// })
+	DoTest(t, DeparseTest{
+		Query:    `DELETE FROM thing WHERE thing.id IN (SELECT id FROM stuff);`,
+		Expected: `DELETE FROM "thing" WHERE "thing"."id" IN (SELECT "id" FROM "stuff")`,
+	})
+	DoTest(t, DeparseTest{
+		Query:    `DELETE FROM thing WHERE thing.id NOT IN (SELECT id FROM stuff);`,
+		Expected: `DELETE FROM "thing" WHERE NOT "thing"."id" IN (SELECT "id" FROM "stuff")`,
+	})
 }
