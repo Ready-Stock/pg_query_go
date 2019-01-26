@@ -56,3 +56,17 @@ func Test_DeleteStmt_Using(t *testing.T) {
 		Expected: `DELETE FROM "thing" USING "stuff", "other" WHERE "stuff"."id" = "thing"."stuff_id" AND "other"."id" = "thing"."other_id"`,
 	})
 }
+
+func Test_DeleteStmt_Only(t *testing.T) {
+	DoTest(t, DeparseTest{
+		Query:    `delete from only thing;`,
+		Expected: `DELETE FROM ONLY "thing"`,
+	})
+}
+
+func Test_DeleteStmt_WhereSelect(t *testing.T) {
+	DoTest(t, DeparseTest{
+		Query:    `DELETE FROM thing WHERE thing.id = (SELECT id FROM stuff);`,
+		Expected: `DELETE FROM "thing" WHERE "thing"."id" = (SELECT "id" FROM "stuff")`,
+	})
+}

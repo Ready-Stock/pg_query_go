@@ -49,7 +49,7 @@ func (node A_Expr) deparseAexpr(ctx Context) (*string, error) {
 	}
 
 	if node.Rexpr != nil {
-		if str, err := deparseNode(node.Rexpr, ctx); err != nil {
+		if str, err := node.Rexpr.Deparse(ctx); err != nil {
 			return nil, err
 		} else {
 			out = append(out, *str)

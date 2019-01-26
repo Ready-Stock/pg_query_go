@@ -7,12 +7,21 @@ import (
 )
 
 func (node DeleteStmt) Deparse(ctx Context) (*string, error) {
-	out := []string{"DELETE FROM", ""}
+	out := make([]string, 0)
+	if node.WithClause != nil {
+		if str, err := node.WithClause.Deparse(Context_None); err != nil {
+			return nil, err
+		} else {
+			out = append(out, *str)
+		}
+	}
+
+	out = append(out, "DELETE FROM")
 
 	if table, err := node.Relation.Deparse(Context_None); err != nil {
 		return nil, err
 	} else {
-		out[1] = *table
+		out = append(out, *table)
 	}
 
 	if len(node.UsingClause.Items) > 0 {
