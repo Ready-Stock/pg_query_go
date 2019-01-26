@@ -6,6 +6,7 @@ enums:
 	@go get -u -a golang.org/x/tools/cmd/stringer
 	@stringer -type ObjectType nodes/object_type.go
 	@stringer -type SortByDir nodes/sort_by_dir.go
+	@stringer -type StmtType nodes/stmt_type.go
 
 build:
 	go get github.com/juju/errors
