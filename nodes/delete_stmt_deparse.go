@@ -15,6 +15,19 @@ func (node DeleteStmt) Deparse(ctx Context) (*string, error) {
 		out[1] = *table
 	}
 
+	if len(node.UsingClause.Items) > 0 {
+		out = append(out, "USING")
+		using := make([]string, len(node.UsingClause.Items))
+		for i, usingItem := range node.UsingClause.Items {
+			if str, err := usingItem.Deparse(Context_None); err != nil {
+				return nil, err
+			} else {
+				using[i] = *str
+			}
+		}
+		out = append(out, strings.Join(using, ", "))
+	}
+
 	if node.WhereClause != nil {
 		out = append(out, "WHERE")
 		if str, err := deparseNode(node.WhereClause, Context_None); err != nil {
@@ -28,7 +41,7 @@ func (node DeleteStmt) Deparse(ctx Context) (*string, error) {
 		out = append(out, "RETURNING")
 		fields := make([]string, len(node.ReturningList.Items))
 		for i, field := range node.ReturningList.Items {
-			if str, err := deparseNode(field, Context_Select); err != nil {
+			if str, err := field.Deparse(Context_Select); err != nil {
 				return nil, err
 			} else {
 				fields[i] = *str
