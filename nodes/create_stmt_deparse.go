@@ -48,6 +48,10 @@ func (node CreateStmt) Deparse(ctx Context) (*string, error) {
 		out = append(out, fmt.Sprintf("(%s)", strings.Join(relations, ", ")))
 	}
 
+	if node.Tablespacename != nil {
+		out = append(out, fmt.Sprintf(`TABLESPACE "%s"`, *node.Tablespacename))
+	}
+
 	result := strings.Join(out, " ")
 	return &result, nil
 }

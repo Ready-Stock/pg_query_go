@@ -84,8 +84,8 @@ func parse(input string) (t *parsetreeList, errr error) {
 	if err != nil {
 		return nil, err
 	}
-	golog.Debugf("QUERY  | %s", input)
-	golog.Debugf("TREE   | %s", string(jsonTree))
+	golog.Debugf(" QUERY  | %s", input)
+	golog.Debugf(" TREE   | %s", string(jsonTree))
 
 	// JSON unmarshalling can panic in edge cases we don't support yet. This is
 	// still a *bug that needs to be fixed*, but this way the caller can expect an

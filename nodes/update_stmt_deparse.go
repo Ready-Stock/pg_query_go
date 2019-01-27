@@ -37,7 +37,7 @@ func (node UpdateStmt) Deparse(ctx Context) (*string, error) {
 	if node.TargetList.Items != nil && len(node.TargetList.Items) > 0 {
 		out = append(out, "SET")
 		for _, target := range node.TargetList.Items {
-			if str, err := deparseNode(target, Context_Update); err != nil {
+			if str, err := target.Deparse(Context_Update); err != nil {
 				return nil, err
 			} else {
 				out = append(out, *str)

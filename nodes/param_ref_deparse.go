@@ -2,7 +2,11 @@
 
 package pg_query
 
-func (node ParamRef) Deparse(ctx Context) (*string, error) {
+import (
+	"fmt"
+)
 
-	panic("Not Implemented")
+func (node ParamRef) Deparse(ctx Context) (*string, error) {
+	result := fmt.Sprintf("$%d", node.Number)
+	return &result, nil
 }
