@@ -73,7 +73,7 @@ func (input parsetreeList) Fingerprint() string {
 	return fmt.Sprintf("%02x%s", fingerprintVersion, hex.EncodeToString(ctx.Sum()))
 }
 
-func parse(input string) (t *parsetreeList, errr error) {
+func parse(input string, log bool) (t *parsetreeList, errr error) {
 	defer func() {
 		if r := recover(); r != nil {
 			debug.PrintStack()
@@ -84,8 +84,10 @@ func parse(input string) (t *parsetreeList, errr error) {
 	if err != nil {
 		return nil, err
 	}
-	golog.Debugf(" QUERY  | %s", input)
-	golog.Debugf(" TREE   | %s", string(jsonTree))
+	if log {
+		golog.Debugf(" QUERY  | %s", input)
+		golog.Debugf(" TREE   | %s", string(jsonTree))
+	}
 
 	// JSON unmarshalling can panic in edge cases we don't support yet. This is
 	// still a *bug that needs to be fixed*, but this way the caller can expect an
@@ -99,7 +101,7 @@ func parse(input string) (t *parsetreeList, errr error) {
 
 func DoTest(t *testing.T, test DeparseTest) {
 	// First we want to parse the provided query.
-	ast, err := parse(test.Query)
+	ast, err := parse(test.Query, true)
 	if test.ExpectedParseError != "" {
 		assert.EqualError(t, err, test.ExpectedParseError, "did not receive expected parse error")
 	} else {
@@ -121,6 +123,12 @@ func DoTest(t *testing.T, test DeparseTest) {
 
 	} else {
 		golog.Debugf("RESULT | %s\n", *recompiled)
+	}
+
+	_, err = parse(*recompiled, false)
+	if err != nil {
+		t.Errorf("failed to parse recompiled query: %s", err)
+		t.FailNow()
 	}
 
 	if test.Expected != "" {

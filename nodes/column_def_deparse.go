@@ -27,7 +27,7 @@ func (node ColumnDef) Deparse(ctx Context) (*string, error) {
 	if node.Constraints.Items != nil && len(node.Constraints.Items) > 0 {
 		constraints := make([]string, len(node.Constraints.Items))
 		for i, constraint := range node.Constraints.Items {
-			if str, err := deparseNode(constraint, Context_None); err != nil {
+			if str, err := constraint.Deparse(Context_None); err != nil {
 				return nil, err
 			} else {
 				constraints[i] = *str

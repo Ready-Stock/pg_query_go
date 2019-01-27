@@ -39,7 +39,7 @@ func (node CreateStmt) Deparse(ctx Context) (*string, error) {
 		out = append(out, "INHERITS")
 		relations := make([]string, len(node.InhRelations.Items))
 		for i, relation := range node.InhRelations.Items {
-			if str, err := deparseNode(relation, Context_None); err != nil {
+			if str, err := relation.Deparse(Context_None); err != nil {
 				return nil, err
 			} else {
 				relations[i] = *str

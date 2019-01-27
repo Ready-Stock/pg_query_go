@@ -29,7 +29,9 @@ func (node Constraint) Deparse(ctx Context) (*string, error) {
 	case CONSTR_EXCLUSION:
 		out = append(out, "EXCLUSION")
 	case CONSTR_FOREIGN:
-		out = append(out, "FOREIGN KEY")
+		if node.Conname != nil {
+			out = append(out, "FOREIGN KEY")
+		}
 	}
 
 	if node.RawExpr != nil {
