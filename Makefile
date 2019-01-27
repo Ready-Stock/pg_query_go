@@ -10,19 +10,19 @@ enums:
 	@stringer -type SubLinkType nodes/sub_link_type.go
 
 build:
-	go get github.com/juju/errors
-	go get github.com/kataras/go-errors
-	go get github.com/kataras/golog
-	go get github.com/readystock/golog
-	go get github.com/stretchr/testify/assert
-	go get github.com/kr/pretty
-	go build
+	@go get github.com/juju/errors
+	@go get github.com/kataras/go-errors
+	@go get github.com/kataras/golog
+	@go get github.com/readystock/golog
+	@go get github.com/stretchr/testify/assert
+	@go get github.com/kr/pretty
+	@go build
 
 test: protos enums build
-	go test -v ./ ./nodes
+	@go test -v ./ ./nodes
 
 protos:
-	protoc -I=$(PROTOS_DIRECTORY) --go_out=./nodes $(PROTOS_DIRECTORY)/context.proto
+	@protoc -I=$(PROTOS_DIRECTORY) --go_out=./nodes $(PROTOS_DIRECTORY)/context.proto
 
 benchmark:
 	go build -a
