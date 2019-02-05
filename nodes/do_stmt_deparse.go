@@ -2,6 +2,11 @@
 
 package pg_query
 
+import (
+	"fmt"
+)
+
 func (node DoStmt) Deparse(ctx Context) (*string, error) {
-	panic("Not Implemented")
+	result := fmt.Sprintf("DO $$%s$$", node.Args.Items[0].(DefElem).Arg.(String).Str)
+	return &result, nil
 }
